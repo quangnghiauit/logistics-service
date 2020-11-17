@@ -6,6 +6,7 @@ import com.dacn.logicsticservice.model.UserRole;
 import com.dacn.logicsticservice.repository.UserRepository;
 import com.dacn.logicsticservice.repository.UserRoleRepository;
 import com.dacn.logicsticservice.service.UserManagementService;
+import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,10 +31,11 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     @Override
     public List<UserDTO> getAllUser() {
+
         List<UserDTO> userDTOS = new ArrayList<>();
         try {
             List<UserRole> userRoles = userRoleRepository.findUserNameByRoleClient();
-
+            LOGGER.info("getAllUser userRoles data : {}", new Gson().toJson(userRoles));
             if (userRoles.isEmpty()) {
                 return userDTOS;
             }
@@ -46,6 +48,7 @@ public class UserManagementServiceImpl implements UserManagementService {
             });
 
             List<User> users = userRepository.findAllByListUserName(userNames);
+            LOGGER.info("getAllUser users data : {}", new Gson().toJson(users));
             if (users.isEmpty()) {
                 return userDTOS;
             }
@@ -55,8 +58,10 @@ public class UserManagementServiceImpl implements UserManagementService {
                 userDTO.doMappingUsers(user);
                 userDTOS.add(userDTO);
             }
+
+            LOGGER.info("getAllUser response data : {}", new Gson().toJson(userDTOS));
         } catch (Exception ex) {
-            LOGGER.info("getAllUser exception", ex);
+            LOGGER.info("getAllUser exception: {}", ex);
         }
         return userDTOS;
     }
