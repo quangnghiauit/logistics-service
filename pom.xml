@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.dacn</groupId>
     <artifactId>logistics-service</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.3-SNAPSHOT</version>
     <name>logistics-service</name>
     <packaging>jar</packaging>
     <description>Logistics project for Spring Boot</description>
