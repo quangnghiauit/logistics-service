@@ -20,7 +20,7 @@ public class AddressManagementController {
     @Autowired
     private AddressManagementService addressManagementService;
 
-    @RequestMapping(value = "/provinces", method = RequestMethod.GET)
+    @RequestMapping(value = "/get-all-province", method = RequestMethod.GET)
     public ResponseEntity<?> getAllProvinces() {
         return new ResponseEntity<>(addressManagementService.getAllCMProvince(), HttpStatus.OK);
     }
