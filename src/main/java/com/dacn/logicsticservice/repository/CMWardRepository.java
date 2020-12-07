@@ -10,6 +10,9 @@ import java.util.List;
 @Repository
 public interface CMWardRepository extends JpaRepository<CMWard, Integer> {
 
+    @Query(value = "select * from cmward", nativeQuery = true)
+    List<CMWard> getAllWard();
+
     @Query(value = "select * from cmward as w where w.DistrictId = ?1", nativeQuery = true)
     List<CMWard> getCMWardByDistrictId(String districtId);
 }

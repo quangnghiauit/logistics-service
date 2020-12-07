@@ -25,9 +25,19 @@ public class AddressManagementController {
         return new ResponseEntity<>(addressManagementService.getAllCMProvince(), HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/get-all-district", method = RequestMethod.GET)
+    public ResponseEntity<?> getAllDistrict() {
+        return new ResponseEntity<>(addressManagementService.getAllDistrict(), HttpStatus.OK);
+    }
+
     @RequestMapping(value = "/district", method = RequestMethod.GET)
     public ResponseEntity<?> getDistrictByProvinceId(@RequestParam("provinceid") String provinceid) {
         return new ResponseEntity<>(addressManagementService.getDistrictByProvinceId(provinceid), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/get-all-ward", method = RequestMethod.GET)
+    public ResponseEntity<?> getAllWard() {
+        return new ResponseEntity<>(addressManagementService.getAllWard(), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/ward", method = RequestMethod.GET)

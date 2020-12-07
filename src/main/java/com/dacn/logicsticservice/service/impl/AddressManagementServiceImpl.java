@@ -63,6 +63,28 @@ public class AddressManagementServiceImpl implements AddressManagementService {
     }
 
     @Override
+    public BaseResponseDTO<CMDistrictDTO> getAllDistrict() {
+        BaseResponseDTO<CMDistrictDTO> response = new BaseResponseDTO<>();
+        List<CMDistrictDTO> districtDTOS = new ArrayList<>();
+
+        try {
+            List<CMDistrict> cmDistricts = cmDistrictRepository.getAllDistrict();
+            cmDistricts.stream().forEach(entity -> {
+                CMDistrictDTO districtDTO = new CMDistrictDTO();
+                districtDTO.mappingEntityToDTO(entity);
+                districtDTOS.add(districtDTO);
+            });
+
+
+            response.success(SUCCESSFUL.getMessage(), districtDTOS);
+        } catch (Exception e) {
+            LOGGER.info("getAllDistrict exception: {}", e);
+            response.fail(e.getMessage());
+        }
+        return response;
+    }
+
+    @Override
     public BaseResponseDTO<CMDistrictDTO> getDistrictByProvinceId(String providerId) {
         BaseResponseDTO<CMDistrictDTO> response = new BaseResponseDTO<>();
         List<CMDistrictDTO> districtDTOS = new ArrayList<>();
@@ -81,6 +103,28 @@ public class AddressManagementServiceImpl implements AddressManagementService {
             response.success(SUCCESSFUL.getMessage(), districtDTOS);
         } catch (Exception e) {
             LOGGER.info("getDistrictByProvinceId - providerId: {}, exception: {}", providerId, e);
+            response.fail(e.getMessage());
+        }
+        return response;
+    }
+
+    @Override
+    public BaseResponseDTO<CMWardDTO> getAllWard() {
+        BaseResponseDTO<CMWardDTO> response = new BaseResponseDTO<>();
+        List<CMWardDTO> wardDTOS = new ArrayList<>();
+
+        try {
+            List<CMWard> cmWards = cmWardRepository.getAllWard();
+            cmWards.stream().forEach(entity -> {
+                CMWardDTO wardDTO = new CMWardDTO();
+                wardDTO.mappingEntityToDTO(entity);
+                wardDTOS.add(wardDTO);
+            });
+
+
+            response.success(SUCCESSFUL.getMessage(), wardDTOS);
+        } catch (Exception e) {
+            LOGGER.info("getAllWard exception: {}", e);
             response.fail(e.getMessage());
         }
         return response;
