@@ -1,11 +1,13 @@
 package com.dacn.logicsticservice.controllers;
 
+import com.dacn.logicsticservice.dto.request.SuggestRequest;
 import com.dacn.logicsticservice.service.TransManagementService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,5 +29,10 @@ public class TransManagementController {
     @RequestMapping(value = "/customers", method = RequestMethod.GET)
     public ResponseEntity<?> getCustomers() {
         return new ResponseEntity<>(transManagementService.getAllCustomer(), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/get-suggestions", method = RequestMethod.POST)
+    public ResponseEntity<?> getSuggestions(@RequestBody SuggestRequest suggestRequest) {
+        return new ResponseEntity<>(transManagementService.getAllSuggestions(suggestRequest), HttpStatus.OK);
     }
 }
