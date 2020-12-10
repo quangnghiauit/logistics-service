@@ -1,5 +1,6 @@
 package com.dacn.logicsticservice.service;
 
+import com.dacn.logicsticservice.dto.request.OrderRequest;
 import com.dacn.logicsticservice.dto.request.SuggestRequest;
 import com.dacn.logicsticservice.dto.response.BaseResponseDTO;
 import com.dacn.logicsticservice.dto.trans.CompanyDTO;
@@ -13,4 +14,6 @@ public interface TransManagementService {
     BaseResponseDTO<CustomerDTO> getAllCustomer();
 
     BaseResponseDTO<SuggestionResponseDTO> getAllSuggestions(SuggestRequest suggestRequest);
+
+    BaseResponseDTO createOrder(OrderRequest request);
 }

@@ -1,5 +1,6 @@
 package com.dacn.logicsticservice.service.impl;
 
+import com.dacn.logicsticservice.dto.request.OrderRequest;
 import com.dacn.logicsticservice.dto.request.SuggestRequest;
 import com.dacn.logicsticservice.dto.response.BaseResponseDTO;
 import com.dacn.logicsticservice.dto.trans.CompanyDTO;
@@ -37,6 +38,7 @@ public class TransManagementServiceImpl implements TransManagementService {
     private final RulsurChargeRepository rulsurChargeRepository;
     private final CMSurchargeRepository surchargeRepository;
     private final CMCurrencyRepository currencyRepository;
+    private final OrderRepository orderRepository;
 
     @Autowired
     public TransManagementServiceImpl(CompanyRepository companyRepository,
@@ -47,7 +49,8 @@ public class TransManagementServiceImpl implements TransManagementService {
                                       CMContainerRepository containerRepository,
                                       RulsurChargeRepository rulsurChargeRepository,
                                       CMSurchargeRepository surchargeRepository,
-                                      CMCurrencyRepository currencyRepository) {
+                                      CMCurrencyRepository currencyRepository,
+                                      OrderRepository orderRepository) {
 
         this.companyRepository = companyRepository;
         this.customerRepository = customerRepository;
@@ -58,6 +61,7 @@ public class TransManagementServiceImpl implements TransManagementService {
         this.rulsurChargeRepository = rulsurChargeRepository;
         this.surchargeRepository = surchargeRepository;
         this.currencyRepository = currencyRepository;
+        this.orderRepository = orderRepository;
     }
 
     @Override
@@ -128,6 +132,31 @@ public class TransManagementServiceImpl implements TransManagementService {
             response.success(SUCCESSFUL.getMessage(), suggestionResponseDTOS);
         } catch (Exception ex) {
             LOGGER.info("getAllSuggestions exception: {}", ex);
+            response.fail(ex.getMessage());
+        }
+        return response;
+    }
+
+    @Override
+    public BaseResponseDTO createOrder(OrderRequest request) {
+        BaseResponseDTO response = new BaseResponseDTO();
+        try {
+            String wardIdReceiver = request.getWardIdReceiver();
+            String districtIdReceiver = request.getDistrictIdReceiver();
+            String provinceIdReceiver = request.getProvinceIdReceiver();
+            String locDescriptionReceiver = request.getLocDescriptionReceiver();
+
+            CMLocation receiverLocation = locationRepository.getCMLocationByCondition(wardIdReceiver, districtIdReceiver,
+                    provinceIdReceiver, locDescriptionReceiver);
+            LOGGER.info("receiverLocation: {}", GsonUtils.toJsonString(receiverLocation));
+
+            Order order = new Order();
+            order.doMappingEntity(request, receiverLocation);
+            orderRepository.save(order);
+
+            response.success(SUCCESSFUL.getMessage());
+        } catch (Exception ex) {
+            LOGGER.info("createOrder exception: {}", ex);
             response.fail(ex.getMessage());
         }
         return response;

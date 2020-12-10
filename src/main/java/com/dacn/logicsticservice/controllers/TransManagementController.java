@@ -1,5 +1,6 @@
 package com.dacn.logicsticservice.controllers;
 
+import com.dacn.logicsticservice.dto.request.OrderRequest;
 import com.dacn.logicsticservice.dto.request.SuggestRequest;
 import com.dacn.logicsticservice.service.TransManagementService;
 import org.slf4j.Logger;
@@ -34,5 +35,10 @@ public class TransManagementController {
     @RequestMapping(value = "/get-suggestions", method = RequestMethod.POST)
     public ResponseEntity<?> getSuggestions(@RequestBody SuggestRequest suggestRequest) {
         return new ResponseEntity<>(transManagementService.getAllSuggestions(suggestRequest), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/create-order", method = RequestMethod.POST)
+    public ResponseEntity<?> createOrder(@RequestBody OrderRequest orderRequest) {
+        return new ResponseEntity<>(transManagementService.createOrder(orderRequest), HttpStatus.OK);
     }
 }
