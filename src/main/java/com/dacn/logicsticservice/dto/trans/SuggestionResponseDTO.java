@@ -3,6 +3,7 @@ package com.dacn.logicsticservice.dto.trans;
 import com.dacn.logicsticservice.model.Company;
 import com.dacn.logicsticservice.model.RulRate;
 
+import javax.persistence.Column;
 import java.util.List;
 
 public class SuggestionResponseDTO {
@@ -13,6 +14,8 @@ public class SuggestionResponseDTO {
     private float transitTime;
     private float amount;
     private String amountCurrency;
+    private String validDate;
+    private String applyDate;
     private List<SurchargeDTO> surcharges;
 
     public int getRulRateId() {
@@ -63,6 +66,22 @@ public class SuggestionResponseDTO {
         this.coDescription = coDescription;
     }
 
+    public String getValidDate() {
+        return validDate;
+    }
+
+    public void setValidDate(String validDate) {
+        this.validDate = validDate;
+    }
+
+    public String getApplyDate() {
+        return applyDate;
+    }
+
+    public void setApplyDate(String applyDate) {
+        this.applyDate = applyDate;
+    }
+
     public List<SurchargeDTO> getSurcharges() {
         return surcharges;
     }
@@ -77,6 +96,8 @@ public class SuggestionResponseDTO {
         this.coDescription = company.getCoDescription();
         this.transitTime = routTransitTime;
         this.surcharges = surchargeDTOS;
+        this.validDate = rulRate.getValidDate();
+        this.applyDate = rulRate.getApplyDate();
 
         if (!surchargeDTOS.isEmpty()) {
             float totalAmount = 0;
