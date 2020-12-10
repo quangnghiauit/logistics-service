@@ -9,6 +9,8 @@ import com.dacn.logicsticservice.dto.trans.SurchargeDTO;
 import com.dacn.logicsticservice.model.*;
 import com.dacn.logicsticservice.repository.*;
 import com.dacn.logicsticservice.service.TransManagementService;
+import com.dacn.logicsticservice.utils.GsonUtils;
+import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,56 +104,69 @@ public class TransManagementServiceImpl implements TransManagementService {
 
     @Override
     public BaseResponseDTO<SuggestionResponseDTO> getAllSuggestions(SuggestRequest suggestRequest) {
-        String wardIdSender = suggestRequest.getWardIdSender();
-        String districtIdSender = suggestRequest.getDistrictIdSender();
-        String provinceIdSender = suggestRequest.getProvinceIdSender();
-        String locDescriptionSender = suggestRequest.getLocDescriptionSender();
-        String wardIdReceiver = suggestRequest.getWardIdReceiver();
-        String districtIdReceiver = suggestRequest.getDistrictIdReceiver();
-        String provinceIdReceiver = suggestRequest.getProvinceIdReceiver();
-        String locDescriptionReceiver = suggestRequest.getLocDescriptionReceiver();
+        BaseResponseDTO<SuggestionResponseDTO> response = new BaseResponseDTO<>();
+        try {
+            String wardIdSender = suggestRequest.getWardIdSender();
+            String districtIdSender = suggestRequest.getDistrictIdSender();
+            String provinceIdSender = suggestRequest.getProvinceIdSender();
+            String locDescriptionSender = suggestRequest.getLocDescriptionSender();
+            String wardIdReceiver = suggestRequest.getWardIdReceiver();
+            String districtIdReceiver = suggestRequest.getDistrictIdReceiver();
+            String provinceIdReceiver = suggestRequest.getProvinceIdReceiver();
+            String locDescriptionReceiver = suggestRequest.getLocDescriptionReceiver();
 
-        CMLocation senderLocation = locationRepository.getCMLocationByCondition(wardIdSender, districtIdSender,
-                provinceIdSender, locDescriptionSender);
+            CMLocation senderLocation = locationRepository.getCMLocationByCondition(wardIdSender, districtIdSender,
+                    provinceIdSender, locDescriptionSender);
+            LOGGER.info("senderLocation: {}", GsonUtils.toJsonString(senderLocation));
 
-        CMLocation receiverLocation = locationRepository.getCMLocationByCondition(wardIdReceiver, districtIdReceiver,
-                provinceIdReceiver, locDescriptionReceiver);
+            CMLocation receiverLocation = locationRepository.getCMLocationByCondition(wardIdReceiver, districtIdReceiver,
+                    provinceIdReceiver, locDescriptionReceiver);
+            LOGGER.info("receiverLocation: {}", GsonUtils.toJsonString(receiverLocation));
 
-        return processSuggestions(senderLocation, receiverLocation);
+            List<SuggestionResponseDTO> suggestionResponseDTOS = processSuggestions(senderLocation, receiverLocation);
+
+            response.success(SUCCESSFUL.getMessage(), suggestionResponseDTOS);
+        } catch (Exception ex) {
+            LOGGER.info("getAllSuggestions exception: {}", ex);
+            response.fail(ex.getMessage());
+        }
+        return response;
     }
 
-    private BaseResponseDTO<SuggestionResponseDTO> processSuggestions(CMLocation senderLocation, CMLocation receiverLocation) {
-        BaseResponseDTO<SuggestionResponseDTO> result = new BaseResponseDTO<>();
+    private List<SuggestionResponseDTO> processSuggestions(CMLocation senderLocation, CMLocation receiverLocation) {
         List<SuggestionResponseDTO> suggestionResponseDTOS = new ArrayList<>();
-        CMRouting routing = routingRepository.getCMRoutingByFirstLastStep(senderLocation.getId(), receiverLocation.getId());
-        List<RulRate> rulRates = rulRateRepository.getRulRateByRoutId(routing.getId());
+        try {
+            CMRouting routing = routingRepository.getCMRoutingByFirstLastStep(senderLocation.getId(), receiverLocation.getId());
+            LOGGER.info("routing: {}", GsonUtils.toJsonString(routing));
 
+            List<RulRate> rulRates = rulRateRepository.getRulRateByRoutId(routing.getId());
 
-        for (RulRate rulRate : rulRates) {
-            SuggestionResponseDTO dto = new SuggestionResponseDTO();
-            Company company = companyRepository.getCompanyById(rulRate.getCompanyID());
+            for (RulRate rulRate : rulRates) {
+                SuggestionResponseDTO dto = new SuggestionResponseDTO();
+                Company company = companyRepository.getCompanyById(rulRate.getCompanyID());
 
-            List<RulsurCharge> rulsurCharges = rulsurChargeRepository.getRulsurChargeById(rulRate.getId());
-            List<SurchargeDTO> surchargeDTOS = new ArrayList<>();
-            for (RulsurCharge rulsurCharge : rulsurCharges) {
-                SurchargeDTO surchargeDTO = new SurchargeDTO();
-                surchargeDTO.setAmount(rulsurCharge.getAmount());
-                surchargeDTO.setId(rulsurCharge.getSurID());
+                List<RulsurCharge> rulsurCharges = rulsurChargeRepository.getRulsurChargeByRulRateID(rulRate.getId());
+                List<SurchargeDTO> surchargeDTOS = new ArrayList<>();
+                for (RulsurCharge rulsurCharge : rulsurCharges) {
+                    SurchargeDTO surchargeDTO = new SurchargeDTO();
+                    surchargeDTO.setAmount(rulsurCharge.getAmount());
+                    surchargeDTO.setId(rulsurCharge.getSurID());
 
-                CMSurcharge surcharge = surchargeRepository.getCMSurchargeById(rulsurCharge.getSurID());
-                surchargeDTO.setSurCode(surcharge.getSurCode());
-                surchargeDTO.setSurName(surcharge.getSurName());
+                    CMSurcharge surcharge = surchargeRepository.getCMSurchargeById(rulsurCharge.getSurID());
+                    surchargeDTO.setSurCode(surcharge.getSurCode());
+                    surchargeDTO.setSurName(surcharge.getSurName());
 
-                CMCurrency currency = currencyRepository.getCMCurrencyById(rulsurCharge.getCurrencyId());
-                surchargeDTO.setCurrencyName(currency.getCurName());
-                surchargeDTOS.add(surchargeDTO);
+                    CMCurrency currency = currencyRepository.getCMCurrencyById(rulsurCharge.getCurrencyId());
+                    surchargeDTO.setCurrencyName(currency.getCurName());
+                    surchargeDTOS.add(surchargeDTO);
+                }
+                dto.doMappingEntityToDTO(rulRate, company, routing.getRoutTransitTime(), surchargeDTOS);
+                suggestionResponseDTOS.add(dto);
             }
-            dto.doMappingEntityToDTO(rulRate, company, routing.getRoutTransitTime(), surchargeDTOS);
-            suggestionResponseDTOS.add(dto);
+        } catch (Exception ex) {
+            LOGGER.info("processSuggestions exception: {}", ex.getMessage());
         }
-        result.success(SUCCESSFUL.getMessage(), suggestionResponseDTOS);
-        return result;
-
+        return suggestionResponseDTOS;
     }
 
 }

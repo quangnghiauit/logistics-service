@@ -10,6 +10,5 @@ import java.util.List;
 @Repository
 public interface RulsurChargeRepository extends JpaRepository<RulsurCharge, Integer> {
 
-    @Query(value = "select * from rulsurcharge where RulRateID = ?1", nativeQuery = true)
-    List<RulsurCharge> getRulsurChargeById(int id);
+    List<RulsurCharge> getRulsurChargeByRulRateID(int ruleRateID);
 }

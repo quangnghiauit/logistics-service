@@ -8,8 +8,11 @@ public class RulsurCharge {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name ="RulRateID")
+    @Column(name ="ID")
     private int id;
+
+    @Column(name ="RulRateID")
+    private int rulRateID;
 
     @Column(name = "SurID")
     private int surID;
@@ -29,6 +32,14 @@ public class RulsurCharge {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getRulRateID() {
+        return rulRateID;
+    }
+
+    public void setRulRateID(int rulRateID) {
+        this.rulRateID = rulRateID;
     }
 
     public int getSurID() {
