@@ -4,6 +4,7 @@ package com.dacn.logicsticservice.model;
 import com.dacn.logicsticservice.dto.request.OrderRequest;
 
 import javax.persistence.*;
+import java.util.Optional;
 
 @Entity
 @Table(name = "orders")
@@ -29,13 +30,13 @@ public class Order {
     @Column(name ="TotalAmount")
     private float totalAmount;
 
-    @Column(name ="ReceiveName")
-    private String receiveName;
+    @Column(name ="ReceiverName")
+    private String receiverName;
 
-    @Column(name ="ReceivePhone")
-    private int receivePhone;
+    @Column(name ="ReceiverPhone")
+    private int receiverPhone;
 
-    @Column(name ="ReceiveLocation")
+    @Column(name ="ReceiverLocation")
     private int receiveLocation;
 
     @Column(name ="VolumeProduction")
@@ -46,6 +47,15 @@ public class Order {
 
     @Column(name ="Description")
     private String description;
+
+    @Column(name ="SenderName")
+    private String senderName;
+
+    @Column(name ="SenderPhone")
+    private long senderPhone;
+
+    @Column(name ="SenderLocation")
+    private int senderLocation;
 
     public int getId() {
         return id;
@@ -95,20 +105,20 @@ public class Order {
         this.totalAmount = totalAmount;
     }
 
-    public String getReceiveName() {
-        return receiveName;
+    public String getReceiverName() {
+        return receiverName;
     }
 
-    public void setReceiveName(String receiveName) {
-        this.receiveName = receiveName;
+    public void setReceiverName(String receiveName) {
+        this.receiverName = receiveName;
     }
 
-    public int getReceivePhone() {
-        return receivePhone;
+    public int getReceiverPhone() {
+        return receiverPhone;
     }
 
-    public void setReceivePhone(int receivePhone) {
-        this.receivePhone = receivePhone;
+    public void setReceiverPhone(int receivePhone) {
+        this.receiverPhone = receivePhone;
     }
 
     public float getVolumeProduction() {
@@ -143,17 +153,54 @@ public class Order {
         this.receiveLocation = receiveLocation;
     }
 
-    public void doMappingEntity(OrderRequest request, CMLocation receiverLocation) {
+    public String getSenderName() {
+        return senderName;
+    }
+
+    public void setSenderName(String senderName) {
+        this.senderName = senderName;
+    }
+
+    public long getSenderPhone() {
+        return senderPhone;
+    }
+
+    public void setSenderPhone(long senderPhone) {
+        this.senderPhone = senderPhone;
+    }
+
+    public int getSenderLocation() {
+        return senderLocation;
+    }
+
+    public void setSenderLocation(int senderLocation) {
+        this.senderLocation = senderLocation;
+    }
+
+    public void doMappingEntity(OrderRequest request, CMLocation receiverLocation, Customer senderInfo, CMLocation senderLocation) {
         this.rulID = request.getRulID();
         this.cusID = request.getCusID();
         this.status = request.getStatus();
         this.totalAmount = request.getTotalAmount();
-        this.receiveName = request.getReceiverName();
-        this.receivePhone = Integer.parseInt(request.getReceiverPhone());
-        this.receiveLocation = receiverLocation.getId();
+        this.receiverName = request.getReceiverName();
+        this.receiverPhone = Integer.parseInt(request.getReceiverPhone());
+
+        if (receiverLocation != null) {
+            this.receiveLocation = receiverLocation.getId();
+        }
+
         this.volumeProduction = request.getVolumeProduction();
         this.typeProduct = request.getTypeProduct();
         this.description = request.getDescription();
         this.createdDate = request.getCreatedDate();
+
+        if (senderInfo != null) {
+            this.senderName = senderInfo.getCusLastName();
+            this.senderPhone = senderInfo.getCusPhone();
+        }
+
+        if (senderLocation != null) {
+            this.senderLocation = senderLocation.getId();
+        }
     }
 }

@@ -89,6 +89,13 @@
             <version>2.8.6</version>
         </dependency>
 
+<!--        kafka-->
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>0.10.0.0</version>
+        </dependency>
+
     </dependencies>
 
     <build>

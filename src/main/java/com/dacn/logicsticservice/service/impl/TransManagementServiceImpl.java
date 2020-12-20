@@ -12,14 +12,15 @@ import com.dacn.logicsticservice.repository.*;
 import com.dacn.logicsticservice.service.TransManagementService;
 import com.dacn.logicsticservice.utils.GsonUtils;
 import com.google.gson.Gson;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Currency;
-import java.util.List;
+import java.util.*;
 
 
 import static com.dacn.logicsticservice.enumeration.ReturnCodeEnum.SUCCESSFUL;
@@ -146,13 +147,29 @@ public class TransManagementServiceImpl implements TransManagementService {
             String provinceIdReceiver = request.getProvinceIdReceiver();
             String locDescriptionReceiver = request.getLocDescriptionReceiver();
 
+            String wardIdSender = request.getWardIdSender();
+            String districtIdSender = request.getDistrictIdSender();
+            String provinceIdSender = request.getProvinceIdSender();
+            String locDescriptionSender = request.getLocDescriptionSender();
+
             CMLocation receiverLocation = locationRepository.getCMLocationByCondition(wardIdReceiver, districtIdReceiver,
                     provinceIdReceiver, locDescriptionReceiver);
             LOGGER.info("receiverLocation: {}", GsonUtils.toJsonString(receiverLocation));
 
+            CMLocation senderLocation = locationRepository.getCMLocationByCondition(wardIdSender, districtIdSender,
+                    provinceIdSender, locDescriptionSender);
+            LOGGER.info("senderLocation: {}", GsonUtils.toJsonString(senderLocation));
+
+            Customer senderInfo = customerRepository.getCustomerByID(request.getCusID());
+
+            LOGGER.info("senderInfo: {}", GsonUtils.toJsonString(senderInfo));
+
             Order order = new Order();
-            order.doMappingEntity(request, receiverLocation);
+            order.doMappingEntity(request, receiverLocation, senderInfo, senderLocation);
             orderRepository.save(order);
+
+            //producer kafka
+//            producerOrderRequest(order);
 
             response.success(SUCCESSFUL.getMessage());
         } catch (Exception ex) {
@@ -160,6 +177,26 @@ public class TransManagementServiceImpl implements TransManagementService {
             response.fail(ex.getMessage());
         }
         return response;
+    }
+
+    private Boolean producerOrderRequest(Order order) {
+        try {
+            Properties props = new Properties();
+            props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+            props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
+            props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
+            KafkaProducer<String, String> producer = new KafkaProducer<String, String>(props);
+            String sender = new Gson().toJson(order);
+            ProducerRecord<String, String> data = new ProducerRecord<String, String>("orderLog", 0, null, sender);
+            producer.send(data);
+            producer.close();
+
+            LOGGER.info("producerOrderRequest successful : {}", GsonUtils.toJsonString(order));
+            return true;
+        } catch (Exception ex) {
+            LOGGER.info("producerOrderRequest exception: {}", ex);
+        }
+        return false;
     }
 
     private List<SuggestionResponseDTO> processSuggestions(CMLocation senderLocation, CMLocation receiverLocation) {

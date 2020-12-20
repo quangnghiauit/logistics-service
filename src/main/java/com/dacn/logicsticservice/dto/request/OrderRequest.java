@@ -13,6 +13,10 @@ public class OrderRequest {
     private String districtIdReceiver;
     private String provinceIdReceiver;
     private String locDescriptionReceiver;
+    private String wardIdSender;
+    private String districtIdSender;
+    private String provinceIdSender;
+    private String locDescriptionSender;
     private String typeProduct;
     private String description;
 
@@ -126,5 +130,37 @@ public class OrderRequest {
 
     public void setCreatedDate(String createdDate) {
         this.createdDate = createdDate;
+    }
+
+    public String getWardIdSender() {
+        return wardIdSender;
+    }
+
+    public void setWardIdSender(String wardIdSender) {
+        this.wardIdSender = wardIdSender;
+    }
+
+    public String getDistrictIdSender() {
+        return districtIdSender;
+    }
+
+    public void setDistrictIdSender(String districtIdSender) {
+        this.districtIdSender = districtIdSender;
+    }
+
+    public String getProvinceIdSender() {
+        return provinceIdSender;
+    }
+
+    public void setProvinceIdSender(String provinceIdSender) {
+        this.provinceIdSender = provinceIdSender;
+    }
+
+    public String getLocDescriptionSender() {
+        return locDescriptionSender;
+    }
+
+    public void setLocDescriptionSender(String locDescriptionSender) {
+        this.locDescriptionSender = locDescriptionSender;
     }
 }
