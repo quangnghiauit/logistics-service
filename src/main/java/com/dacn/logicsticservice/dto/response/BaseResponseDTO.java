@@ -72,9 +72,9 @@ public class BaseResponseDTO<T> {
         return this;
     }
 
-    public BaseResponseDTO<T> success(@NonNull String returnmessage, @NonNull T data) {
+    public BaseResponseDTO<T> success(@NonNull T data) {
         this.returncode = TransStatusEnum.SUCCESSFUL.getValue();
-        this.returnmessage = returnmessage;
+        this.returnmessage = ReturnCodeEnum.SUCCESSFUL.getMessage();
         this.data = data;
         return this;
     }
