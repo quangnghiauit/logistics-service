@@ -13,6 +13,8 @@ public class OrderRequest {
     private String districtIdReceiver;
     private String provinceIdReceiver;
     private String locDescriptionReceiver;
+    private String senderName;
+    private String senderPhone;
     private String wardIdSender;
     private String districtIdSender;
     private String provinceIdSender;
@@ -162,5 +164,21 @@ public class OrderRequest {
 
     public void setLocDescriptionSender(String locDescriptionSender) {
         this.locDescriptionSender = locDescriptionSender;
+    }
+
+    public String getSenderName() {
+        return senderName;
+    }
+
+    public void setSenderName(String senderName) {
+        this.senderName = senderName;
+    }
+
+    public String getSenderPhone() {
+        return senderPhone;
+    }
+
+    public void setSenderPhone(String senderPhone) {
+        this.senderPhone = senderPhone;
     }
 }

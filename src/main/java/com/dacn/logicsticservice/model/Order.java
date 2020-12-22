@@ -2,6 +2,8 @@ package com.dacn.logicsticservice.model;
 
 
 import com.dacn.logicsticservice.dto.request.OrderRequest;
+import com.dacn.logicsticservice.utils.DateTimeUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import javax.persistence.*;
 import java.util.Optional;
@@ -177,7 +179,7 @@ public class Order {
         this.senderLocation = senderLocation;
     }
 
-    public void doMappingEntity(OrderRequest request, CMLocation receiverLocation, Customer senderInfo, CMLocation senderLocation) {
+    public void doMappingEntity(OrderRequest request, CMLocation receiverLocation, CMLocation senderLocation) {
         this.rulID = request.getRulID();
         this.cusID = request.getCusID();
         this.status = request.getStatus();
@@ -192,11 +194,11 @@ public class Order {
         this.volumeProduction = request.getVolumeProduction();
         this.typeProduct = request.getTypeProduct();
         this.description = request.getDescription();
-        this.createdDate = request.getCreatedDate();
+        this.createdDate = DateTimeUtils.getCurrentDateTime();
 
-        if (senderInfo != null) {
-            this.senderName = senderInfo.getCusLastName();
-            this.senderPhone = senderInfo.getCusPhone();
+        this.senderName = request.getSenderName();
+        if (NumberUtils.isDigits(request.getSenderPhone())) {
+            this.senderPhone = Long.parseLong(request.getSenderPhone());
         }
 
         if (senderLocation != null) {

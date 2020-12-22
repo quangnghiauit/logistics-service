@@ -160,12 +160,8 @@ public class TransManagementServiceImpl implements TransManagementService {
                     provinceIdSender, locDescriptionSender);
             LOGGER.info("senderLocation: {}", GsonUtils.toJsonString(senderLocation));
 
-            Customer senderInfo = customerRepository.getCustomerByID(request.getCusID());
-
-            LOGGER.info("senderInfo: {}", GsonUtils.toJsonString(senderInfo));
-
             Order order = new Order();
-            order.doMappingEntity(request, receiverLocation, senderInfo, senderLocation);
+            order.doMappingEntity(request, receiverLocation, senderLocation);
             orderRepository.save(order);
 
             //producer kafka
