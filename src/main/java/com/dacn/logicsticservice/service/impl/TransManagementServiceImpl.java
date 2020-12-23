@@ -165,7 +165,7 @@ public class TransManagementServiceImpl implements TransManagementService {
             orderRepository.save(order);
 
             //producer kafka
-//            producerOrderRequest(order);
+            producerOrderRequest(order);
 
             response.success(SUCCESSFUL.getMessage());
         } catch (Exception ex) {
@@ -178,7 +178,7 @@ public class TransManagementServiceImpl implements TransManagementService {
     private Boolean producerOrderRequest(Order order) {
         try {
             Properties props = new Properties();
-            props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+            props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "52.168.24.38:9092");
             props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
             props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
             KafkaProducer<String, String> producer = new KafkaProducer<String, String>(props);
