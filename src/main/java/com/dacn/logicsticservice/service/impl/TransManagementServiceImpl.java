@@ -3,10 +3,7 @@ package com.dacn.logicsticservice.service.impl;
 import com.dacn.logicsticservice.dto.request.OrderRequest;
 import com.dacn.logicsticservice.dto.request.SuggestRequest;
 import com.dacn.logicsticservice.dto.response.BaseResponseDTO;
-import com.dacn.logicsticservice.dto.trans.CompanyDTO;
-import com.dacn.logicsticservice.dto.trans.CustomerDTO;
-import com.dacn.logicsticservice.dto.trans.SuggestionResponseDTO;
-import com.dacn.logicsticservice.dto.trans.SurchargeDTO;
+import com.dacn.logicsticservice.dto.trans.*;
 import com.dacn.logicsticservice.model.*;
 import com.dacn.logicsticservice.repository.*;
 import com.dacn.logicsticservice.service.TransManagementService;
@@ -165,11 +162,57 @@ public class TransManagementServiceImpl implements TransManagementService {
             orderRepository.save(order);
 
             //producer kafka
-            producerOrderRequest(order);
+//            producerOrderRequest(order);
 
             response.success(SUCCESSFUL.getMessage());
         } catch (Exception ex) {
             LOGGER.info("createOrder exception: {}", ex);
+            response.fail(ex.getMessage());
+        }
+        return response;
+    }
+
+    @Override
+    public BaseResponseDTO getOrderByFilter(Integer cusId, Integer orderId, Integer companyId) {
+        BaseResponseDTO response = new BaseResponseDTO();
+        List<OrderDTO> orderDTOS = new ArrayList<>();
+        List<Order> orders = new ArrayList<>();
+        try {
+            if (Objects.nonNull(cusId)) {
+                orders = orderRepository.getAllByCusId(cusId);
+                LOGGER.info("getOrderByFilter with customerId: {}, response: {}", cusId, GsonUtils.toJsonString(orders));
+            }
+
+            if (Objects.nonNull(orderId)) {
+                orders = Collections.singletonList(orderRepository.getAllById(orderId));
+                LOGGER.info("getOrderByFilter with orderId: {}, response: {}", orderId, GsonUtils.toJsonString(orders));
+            }
+
+            if (Objects.nonNull(companyId)) {
+                List<RulRate> rulRates = rulRateRepository.getRulRateByCompanyID(companyId);
+                LOGGER.info("getRulRateByCompanyID with companyId: {}, response: {}", companyId, GsonUtils.toJsonString(rulRates));
+
+                List<Order> finalOrders = new ArrayList<>();
+                rulRates.stream().forEach(model -> {
+                    List<Order> orderByRulrate = orderRepository.getAllByRulID(model.getId());
+                    finalOrders.addAll(orderByRulrate);
+                });
+
+                orders = finalOrders;
+                LOGGER.info("getOrderByFilter with companyId: {}, response: {}", companyId, GsonUtils.toJsonString(orders));
+            }
+
+            orders.stream().forEach(model -> {
+                OrderDTO orderDTO = new OrderDTO();
+                orderDTO.doMappingEntity(model);
+                orderDTOS.add(orderDTO);
+            });
+
+            LOGGER.info("getOrderByFilter: {}", GsonUtils.toJsonString(orderDTOS));
+
+            response.success(SUCCESSFUL.getMessage(), orderDTOS);
+        } catch (Exception ex) {
+            LOGGER.info("getOrderByFilter exception: {}", ex);
             response.fail(ex.getMessage());
         }
         return response;

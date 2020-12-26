@@ -12,4 +12,7 @@ public interface CMRulRateRepository extends JpaRepository<RulRate, Integer> {
 
     @Query(value = "select * from rulrate as r where r.RoutID = ?1", nativeQuery = true)
     List<RulRate> getRulRateByRoutId(String routId);
+
+    @Query(value = "select * from rulrate as r where r.CompanyID = ?1", nativeQuery = true)
+    List<RulRate> getRulRateByCompanyID(Integer companyID);
 }

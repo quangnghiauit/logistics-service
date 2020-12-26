@@ -16,4 +16,6 @@ public interface TransManagementService {
     BaseResponseDTO<SuggestionResponseDTO> getAllSuggestions(SuggestRequest suggestRequest);
 
     BaseResponseDTO createOrder(OrderRequest request);
+
+    BaseResponseDTO getOrderByFilter(Integer cusId, Integer orderId, Integer companyId);
 }

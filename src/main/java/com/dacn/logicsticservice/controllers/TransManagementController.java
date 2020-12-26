@@ -8,10 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.lang.Nullable;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/trans")
@@ -40,5 +38,12 @@ public class TransManagementController {
     @RequestMapping(value = "/create-order", method = RequestMethod.POST)
     public ResponseEntity<?> createOrder(@RequestBody OrderRequest orderRequest) {
         return new ResponseEntity<>(transManagementService.createOrder(orderRequest), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/orders", method = RequestMethod.GET)
+    public ResponseEntity<?> getOrderByFilter(@Nullable @RequestParam("cusId") Integer cusId,
+                                              @Nullable @RequestParam("orderId") Integer orderId,
+                                              @Nullable @RequestParam("companyId") Integer companyId) {
+        return new ResponseEntity<>(transManagementService.getOrderByFilter(cusId, orderId, companyId), HttpStatus.OK);
     }
 }
