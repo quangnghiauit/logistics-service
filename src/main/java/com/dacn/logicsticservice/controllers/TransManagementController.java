@@ -46,4 +46,9 @@ public class TransManagementController {
                                               @Nullable @RequestParam("companyId") Integer companyId) {
         return new ResponseEntity<>(transManagementService.getOrderByFilter(cusId, orderId, companyId), HttpStatus.OK);
     }
+
+    @RequestMapping(value = "/status", method = RequestMethod.GET)
+    public ResponseEntity<?> statusMap() {
+        return new ResponseEntity<>(transManagementService.getMapStatus(), HttpStatus.OK);
+    }
 }

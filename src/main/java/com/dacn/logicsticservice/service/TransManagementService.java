@@ -7,6 +7,9 @@ import com.dacn.logicsticservice.dto.trans.CompanyDTO;
 import com.dacn.logicsticservice.dto.trans.CustomerDTO;
 import com.dacn.logicsticservice.dto.trans.SuggestionResponseDTO;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public interface TransManagementService {
 
     BaseResponseDTO<CompanyDTO> getAllCompany();
@@ -18,4 +21,6 @@ public interface TransManagementService {
     BaseResponseDTO createOrder(OrderRequest request);
 
     BaseResponseDTO getOrderByFilter(Integer cusId, Integer orderId, Integer companyId);
+
+    Map<Integer, String> getMapStatus();
 }

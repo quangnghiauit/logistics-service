@@ -37,6 +37,7 @@ public class TransManagementServiceImpl implements TransManagementService {
     private final CMSurchargeRepository surchargeRepository;
     private final CMCurrencyRepository currencyRepository;
     private final OrderRepository orderRepository;
+    private final CMStatusRepository statusRepository;
 
     @Autowired
     public TransManagementServiceImpl(CompanyRepository companyRepository,
@@ -48,7 +49,8 @@ public class TransManagementServiceImpl implements TransManagementService {
                                       RulsurChargeRepository rulsurChargeRepository,
                                       CMSurchargeRepository surchargeRepository,
                                       CMCurrencyRepository currencyRepository,
-                                      OrderRepository orderRepository) {
+                                      OrderRepository orderRepository,
+                                      CMStatusRepository statusRepository) {
 
         this.companyRepository = companyRepository;
         this.customerRepository = customerRepository;
@@ -60,6 +62,7 @@ public class TransManagementServiceImpl implements TransManagementService {
         this.surchargeRepository = surchargeRepository;
         this.currencyRepository = currencyRepository;
         this.orderRepository = orderRepository;
+        this.statusRepository = statusRepository;
     }
 
     @Override
@@ -216,6 +219,18 @@ public class TransManagementServiceImpl implements TransManagementService {
             response.fail(ex.getMessage());
         }
         return response;
+    }
+
+    @Override
+    public Map<Integer, String> getMapStatus() {
+        Map<Integer, String> statusMap = new HashMap<>();
+        List<CMStatus> statusList = statusRepository.getAll();
+
+        statusList.stream().forEach(model -> {
+            statusMap.put(model.getId(), model.getName());
+        });
+
+        return statusMap;
     }
 
     private Boolean producerOrderRequest(Order order) {
