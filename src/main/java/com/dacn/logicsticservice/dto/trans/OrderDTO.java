@@ -3,6 +3,7 @@ package com.dacn.logicsticservice.dto.trans;
 
 import com.dacn.logicsticservice.dto.request.OrderRequest;
 import com.dacn.logicsticservice.model.CMLocation;
+import com.dacn.logicsticservice.model.Customer;
 import com.dacn.logicsticservice.model.Order;
 import com.dacn.logicsticservice.utils.DateTimeUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -14,18 +15,22 @@ public class OrderDTO {
     private int id;
     private int rulID;
     private int cusID;
+    private Customer customerInfo;
     private String createdDate;
     private int status;
+    private String statusMessage;
     private float totalAmount;
+    private RulRateDTO rulRate;
     private String receiverName;
     private int receiverPhone;
-    private int receiveLocation;
     private float volumeProduction;
     private String typeProduct;
     private String description;
     private String senderName;
     private long senderPhone;
-    private int senderLocation;
+    private CMLocation receiverLocation;
+    private CMLocation senderLocation;
+
 
     public int getId() {
         return id;
@@ -115,14 +120,6 @@ public class OrderDTO {
         this.description = description;
     }
 
-    public int getReceiveLocation() {
-        return receiveLocation;
-    }
-
-    public void setReceiveLocation(int receiveLocation) {
-        this.receiveLocation = receiveLocation;
-    }
-
     public String getSenderName() {
         return senderName;
     }
@@ -139,12 +136,44 @@ public class OrderDTO {
         this.senderPhone = senderPhone;
     }
 
-    public int getSenderLocation() {
+    public CMLocation getReceiverLocation() {
+        return receiverLocation;
+    }
+
+    public void setReceiverLocation(CMLocation receiverLocation) {
+        this.receiverLocation = receiverLocation;
+    }
+
+    public CMLocation getSenderLocation() {
         return senderLocation;
     }
 
-    public void setSenderLocation(int senderLocation) {
+    public void setSenderLocation(CMLocation senderLocation) {
         this.senderLocation = senderLocation;
+    }
+
+    public String getStatusMessage() {
+        return statusMessage;
+    }
+
+    public void setStatusMessage(String statusMessage) {
+        this.statusMessage = statusMessage;
+    }
+
+    public Customer getCustomerInfo() {
+        return customerInfo;
+    }
+
+    public void setCustomerInfo(Customer customerInfo) {
+        this.customerInfo = customerInfo;
+    }
+
+    public RulRateDTO getRulRate() {
+        return rulRate;
+    }
+
+    public void setRulRate(RulRateDTO rulRate) {
+        this.rulRate = rulRate;
     }
 
     public void doMappingEntity(Order request) {
@@ -154,13 +183,11 @@ public class OrderDTO {
         this.totalAmount = request.getTotalAmount();
         this.receiverName = request.getReceiverName();
         this.receiverPhone = request.getReceiverPhone();
-        this.receiveLocation = request.getReceiveLocation();
         this.volumeProduction = request.getVolumeProduction();
         this.typeProduct = request.getTypeProduct();
         this.description = request.getDescription();
         this.createdDate = request.getCreatedDate();
         this.senderPhone = request.getSenderPhone();
         this.senderName = request.getSenderName();
-        this.senderLocation = request.getSenderLocation();
     }
 }

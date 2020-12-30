@@ -11,5 +11,5 @@ import java.util.List;
 public interface CMContainerRepository extends JpaRepository<CMContainer, Integer> {
 
     @Query(value = "select * from cmcontainer where ID = ?1", nativeQuery = true)
-    List<CMContainer> getCMContainerById(String id);
+    CMContainer getCMContainerById(int id);
 }

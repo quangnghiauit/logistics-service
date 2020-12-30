@@ -12,4 +12,7 @@ public interface CMRoutingRepository extends JpaRepository<CMRouting, Integer> {
 
     @Query(value = "select * from cmrouting as r where r.RoutFirstStep = ?1 and r.RoutLastStep = ?2", nativeQuery = true)
     CMRouting getCMRoutingByFirstLastStep(int routFirstStep, int routLastStep);
+
+    @Query(value = "select * from cmrouting where ID = ?1 ", nativeQuery = true)
+    CMRouting getCMRoutingById(int id);
 }

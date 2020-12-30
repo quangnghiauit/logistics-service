@@ -14,4 +14,7 @@ public interface CMStatusRepository extends JpaRepository<CMStatus, Integer> {
 
     @Query(value = "select * from cmstatus", nativeQuery = true)
     List<CMStatus> getAll();
+
+    @Query(value = "select * from cmstatus where Id = ?1", nativeQuery = true)
+    CMStatus getCMStatusById(int id);
 }

@@ -207,6 +207,38 @@ public class TransManagementServiceImpl implements TransManagementService {
 
             orders.stream().forEach(model -> {
                 OrderDTO orderDTO = new OrderDTO();
+
+                Customer customerInfo = customerRepository.getCustomerByID(model.getCusID());
+                orderDTO.setCustomerInfo(customerInfo);
+
+                CMLocation receiverLocation = locationRepository.getCMLocationById(model.getReceiveLocation());
+                orderDTO.setReceiverLocation(receiverLocation);
+
+                CMLocation senderLocation = locationRepository.getCMLocationById(model.getSenderLocation());
+                orderDTO.setSenderLocation(senderLocation);
+
+                CMStatus status = statusRepository.getCMStatusById(model.getStatus());
+                orderDTO.setStatusMessage(status.getName());
+
+                RulRate rulRate = rulRateRepository.getRulRateById(model.getRulID());
+                if (rulRate != null) {
+                    RulRateDTO rulRateDTO = new RulRateDTO();
+                    CMRouting routing = routingRepository.getCMRoutingById(rulRate.getRoutID());
+                    rulRateDTO.setRouting(routing);
+
+                    CMContainer container = containerRepository.getCMContainerById(rulRate.getContID());
+                    rulRateDTO.setContainer(container);
+
+                    Company company = companyRepository.getCompanyById(rulRate.getCompanyID());
+                    rulRateDTO.setCompany(company);
+
+                    rulRateDTO.setApplyDate(rulRate.getApplyDate());
+                    rulRateDTO.setValidDate(rulRate.getValidDate());
+
+                    orderDTO.setRulRate(rulRateDTO);
+                }
+
+
                 orderDTO.doMappingEntity(model);
                 orderDTOS.add(orderDTO);
             });
