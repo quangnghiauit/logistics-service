@@ -51,4 +51,9 @@ public class TransManagementController {
     public ResponseEntity<?> statusMap() {
         return new ResponseEntity<>(transManagementService.getMapStatus(), HttpStatus.OK);
     }
+
+    @RequestMapping(value = "/dijkstra", method = RequestMethod.GET)
+    public ResponseEntity<?> dijkstra() {
+        return new ResponseEntity<>(transManagementService.getDijkstra(), HttpStatus.OK);
+    }
 }
