@@ -1,21 +1,21 @@
 package com.dacn.logicsticservice.dto.dijkstra;
 
 public class Edge {
-    private double weight;
+    private long weight;
     private Vert startVert;
     private Vert targetVert;
 
-    public Edge(double weight, Vert startVert, Vert targetVert) {
+    public Edge(long weight, Vert startVert, Vert targetVert) {
         this.weight = weight;
         this.startVert = startVert;
         this.targetVert = targetVert;
     }
 
-    public double getWeight() {
+    public long getWeight() {
         return weight;
     }
 
-    public void setWeight(double weight) {
+    public void setWeight(long weight) {
         this.weight = weight;
     }
 

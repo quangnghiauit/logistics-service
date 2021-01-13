@@ -1,6 +1,7 @@
 package com.dacn.logicsticservice.service.impl;
 
 import com.dacn.logicsticservice.dto.dijkstra.Edge;
+import com.dacn.logicsticservice.dto.dijkstra.RoutingMapDTO;
 import com.dacn.logicsticservice.dto.dijkstra.Vert;
 import com.dacn.logicsticservice.dto.request.OrderRequest;
 import com.dacn.logicsticservice.dto.request.SuggestRequest;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 
 import static com.dacn.logicsticservice.enumeration.ReturnCodeEnum.SUCCESSFUL;
@@ -111,8 +113,8 @@ public class TransManagementServiceImpl implements TransManagementService {
     }
 
     @Override
-    public BaseResponseDTO<SuggestionResponseDTO> getAllSuggestions(SuggestRequest suggestRequest) {
-        BaseResponseDTO<SuggestionResponseDTO> response = new BaseResponseDTO<>();
+    public BaseResponseDTO getAllSuggestions(SuggestRequest suggestRequest) {
+        BaseResponseDTO response = new BaseResponseDTO<>();
         try {
             String wardIdSender = suggestRequest.getWardIdSender();
             String districtIdSender = suggestRequest.getDistrictIdSender();
@@ -131,9 +133,9 @@ public class TransManagementServiceImpl implements TransManagementService {
                     provinceIdReceiver, locDescriptionReceiver);
             LOGGER.info("receiverLocation: {}", GsonUtils.toJsonString(receiverLocation));
 
-            List<SuggestionResponseDTO> suggestionResponseDTOS = processSuggestions(senderLocation, receiverLocation);
+            List<SuggestionResponseDTO> responseDTOS = processSuggestions(senderLocation, receiverLocation);
 
-            response.success(SUCCESSFUL.getMessage(), suggestionResponseDTOS);
+            response.success(SUCCESSFUL.getMessage(), responseDTOS);
         } catch (Exception ex) {
             LOGGER.info("getAllSuggestions exception: {}", ex);
             response.fail(ex.getMessage());
@@ -238,37 +240,77 @@ public class TransManagementServiceImpl implements TransManagementService {
 
     @Override
     public BaseResponseDTO getDijkstra() {
-        int firstStep = 1;
+//        int firstStep = 1;
+//        Map<Integer, Vert> verts = new HashMap<>();
+//        List<CMRouting> routings = routingRepository.getAllRouting();
+//        routings.stream().forEach(dto -> {
+//            if (verts.get(dto.getRoutFirstStep()) == null ) {
+//                Vert vert = new Vert("Vert" + dto.getRoutFirstStep());
+//                verts.put(dto.getRoutFirstStep(), vert);
+//            }
+//
+//            if (verts.get(dto.getRoutLastStep()) == null ) {
+//                Vert vert = new Vert("Vert" + dto.getRoutLastStep());
+//                verts.put(dto.getRoutLastStep(), vert);
+//            }
+//        });
+//
+//        routings.stream().forEach(routingPrevious -> {
+//            verts.get(routingPrevious.getRoutFirstStep()).addNeighbour(new Edge(routingPrevious.getRoutTransitTime(),
+//                    verts.get(routingPrevious.getRoutFirstStep()), verts.get(routingPrevious.getRoutLastStep())));
+//        });
+//
+//        LOGGER.info("verts: {}", verts.toString());
+//
+//        PathFinder shortestPath = new PathFinder();
+//        shortestPath.ShortestP(verts.get(1));
+//        for (int i = 2; i <= verts.size(); i++) {
+//            System.out.println("\nKhoảng cách tối thiểu từ V1 đến V" + i + " là:" + verts.get(i).getDist());
+//            System.out.println("\nĐường đi ngắn nhất từ V1 đến V" + i + " là:" + shortestPath.getShortestP(verts.get(i)));
+//        }
+        return null;
+    }
+
+    private List<Vert> initializeMapDijkstra(int start, int end) {
         Map<Integer, Vert> verts = new HashMap<>();
+        List<RoutingMapDTO> routingMapDTOS = new ArrayList<>();
+
         List<CMRouting> routings = routingRepository.getAllRouting();
         routings.stream().forEach(dto -> {
             if (verts.get(dto.getRoutFirstStep()) == null ) {
-                Vert vert = new Vert("Vert" + dto.getRoutFirstStep());
+                Vert vert = new Vert(String.valueOf(dto.getRoutFirstStep()));
                 verts.put(dto.getRoutFirstStep(), vert);
             }
 
             if (verts.get(dto.getRoutLastStep()) == null ) {
-                Vert vert = new Vert("Vert" + dto.getRoutLastStep());
+                Vert vert = new Vert(String.valueOf(dto.getRoutLastStep()));
                 verts.put(dto.getRoutLastStep(), vert);
             }
+
+            RoutingMapDTO routingMapDTO = new RoutingMapDTO();
+            routingMapDTO.doMappingToEntity(dto);
+
+            List<RulRate> rulRates = rulRateRepository.getRulRateByRoutId(dto.getId());
+            AtomicLong totalAmount = new AtomicLong();
+            rulRates.stream().forEach(rulRate -> {
+                List<RulsurCharge> rulsurCharges = rulsurChargeRepository.getRulsurChargeByRulRateID(rulRate.getId());
+                rulsurCharges.stream().forEach(rulsurCharge -> {
+                    totalAmount.addAndGet((long) rulsurCharge.getAmount());
+                });
+            });
+            routingMapDTO.setTotalAmount(totalAmount.get());
+            routingMapDTOS.add(routingMapDTO);
         });
 
-        routings.stream().forEach(routingPrevious -> {
-            verts.get(routingPrevious.getRoutFirstStep()).addNeighbour(new Edge(routingPrevious.getRoutTransitTime(),
+        routingMapDTOS.forEach(routingPrevious -> {
+            verts.get(routingPrevious.getRoutFirstStep()).addNeighbour(new Edge(routingPrevious.getTotalAmount(),
                     verts.get(routingPrevious.getRoutFirstStep()), verts.get(routingPrevious.getRoutLastStep())));
         });
 
-        LOGGER.info("verts: {}", verts.toString());
-
         PathFinder shortestPath = new PathFinder();
-        shortestPath.ShortestP(verts.get(1));
-        for (int i = 2; i <= verts.size(); i++) {
-            System.out.println("\nKhoảng cách tối thiểu từ V1 đến V" + i + " là:" + verts.get(i).getDist());
-            System.out.println("\nĐường đi ngắn nhất từ V1 đến V" + i + " là:" + shortestPath.getShortestP(verts.get(i)));
-        }
-        return null;
+        shortestPath.ShortestP(verts.get(start));
+        return shortestPath.getShortestP(verts.get(end));
     }
-
     private Boolean producerOrderRequest(Order order) {
         try {
             Properties props = new Properties();
@@ -290,39 +332,66 @@ public class TransManagementServiceImpl implements TransManagementService {
     }
 
     private List<SuggestionResponseDTO> processSuggestions(CMLocation senderLocation, CMLocation receiverLocation) {
-        List<SuggestionResponseDTO> suggestionResponseDTOS = new ArrayList<>();
+        List<SuggestionResponseDTO> response = new ArrayList<>();
+        List<SuggestionDetailDTO> suggestionDetailDTOS = new ArrayList<>();
         try {
-            CMRouting routing = routingRepository.getCMRoutingByFirstLastStep(senderLocation.getId(), receiverLocation.getId());
-            LOGGER.info("routing: {}", GsonUtils.toJsonString(routing));
+            List<Vert> input = initializeMapDijkstra(senderLocation.getId(), receiverLocation.getId());
+            LOGGER.info("input", input);
 
-            List<RulRate> rulRates = rulRateRepository.getRulRateByRoutId(routing.getId());
 
-            for (RulRate rulRate : rulRates) {
-                SuggestionResponseDTO dto = new SuggestionResponseDTO();
-                Company company = companyRepository.getCompanyById(rulRate.getCompanyID());
+            List<CMRouting> cmRoutings = getListRouting(input);
+//            CMRouting routing = routingRepository.getCMRoutingByFirstLastStep(senderLocation.getId(), receiverLocation.getId());
+            LOGGER.info("routing: {}", GsonUtils.toJsonString(cmRoutings));
 
-                List<RulsurCharge> rulsurCharges = rulsurChargeRepository.getRulsurChargeByRulRateID(rulRate.getId());
-                List<SurchargeDTO> surchargeDTOS = new ArrayList<>();
-                for (RulsurCharge rulsurCharge : rulsurCharges) {
-                    SurchargeDTO surchargeDTO = new SurchargeDTO();
-                    surchargeDTO.setAmount(rulsurCharge.getAmount());
-                    surchargeDTO.setId(rulsurCharge.getSurID());
+            SuggestionResponseDTO responseDTO = new SuggestionResponseDTO();
+            cmRoutings.forEach(routing -> {
+                List<RulRate> rulRates = rulRateRepository.getRulRateByRoutId(routing.getId());
 
-                    CMSurcharge surcharge = surchargeRepository.getCMSurchargeById(rulsurCharge.getSurID());
-                    surchargeDTO.setSurCode(surcharge.getSurCode());
-                    surchargeDTO.setSurName(surcharge.getSurName());
+                for (RulRate rulRate : rulRates) {
+                    SuggestionDetailDTO dto = new SuggestionDetailDTO();
+                    Company company = companyRepository.getCompanyById(rulRate.getCompanyID());
 
-                    CMCurrency currency = currencyRepository.getCMCurrencyById(rulsurCharge.getCurrencyId());
-                    surchargeDTO.setCurrencyName(currency.getCurName());
-                    surchargeDTOS.add(surchargeDTO);
+                    List<RulsurCharge> rulsurCharges = rulsurChargeRepository.getRulsurChargeByRulRateID(rulRate.getId());
+                    List<SurchargeDTO> surchargeDTOS = new ArrayList<>();
+                    for (RulsurCharge rulsurCharge : rulsurCharges) {
+                        SurchargeDTO surchargeDTO = new SurchargeDTO();
+                        surchargeDTO.setAmount(rulsurCharge.getAmount());
+                        surchargeDTO.setId(rulsurCharge.getSurID());
+
+                        CMSurcharge surcharge = surchargeRepository.getCMSurchargeById(rulsurCharge.getSurID());
+                        surchargeDTO.setSurCode(surcharge.getSurCode());
+                        surchargeDTO.setSurName(surcharge.getSurName());
+
+                        CMCurrency currency = currencyRepository.getCMCurrencyById(rulsurCharge.getCurrencyId());
+                        surchargeDTO.setCurrencyName(currency.getCurName());
+                        surchargeDTOS.add(surchargeDTO);
+                    }
+                    dto.doMappingEntityToDTO(rulRate, company, routing.getRoutTransitTime(), surchargeDTOS);
+                    suggestionDetailDTOS.add(dto);
                 }
-                dto.doMappingEntityToDTO(rulRate, company, routing.getRoutTransitTime(), surchargeDTOS);
-                suggestionResponseDTOS.add(dto);
-            }
+            });
+            responseDTO.setSuggestionDetailDTOS(suggestionDetailDTOS);
+            AtomicLong totalAmount = new AtomicLong();
+            suggestionDetailDTOS.forEach(dto -> {
+                totalAmount.addAndGet((long) dto.getAmount());
+            });
+            responseDTO.setTotalAmount(totalAmount.get());
+            response.add(responseDTO);
         } catch (Exception ex) {
             LOGGER.info("processSuggestions exception: {}", ex.getMessage());
         }
-        return suggestionResponseDTOS;
+        return response;
     }
 
+    private List<CMRouting> getListRouting(List<Vert> verts) {
+        List<CMRouting> response = new ArrayList<>();
+        if (verts.size() > 2) {
+            for (int i = 0; i < verts.size() - 1; i++) {
+                CMRouting routing = routingRepository.
+                        getCMRoutingByFirstLastStep(Integer.parseInt(verts.get(i).getName()), Integer.parseInt(verts.get(i+1).getName()));
+                response.add(routing);
+            }
+        }
+        return response;
+    }
 }
