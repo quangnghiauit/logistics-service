@@ -1,11 +1,14 @@
 package com.dacn.logicsticservice.service.impl;
 
+import com.dacn.logicsticservice.dto.dijkstra.Edge;
+import com.dacn.logicsticservice.dto.dijkstra.Vert;
 import com.dacn.logicsticservice.dto.request.OrderRequest;
 import com.dacn.logicsticservice.dto.request.SuggestRequest;
 import com.dacn.logicsticservice.dto.response.BaseResponseDTO;
 import com.dacn.logicsticservice.dto.trans.*;
 import com.dacn.logicsticservice.model.*;
 import com.dacn.logicsticservice.repository.*;
+import com.dacn.logicsticservice.service.PathFinder;
 import com.dacn.logicsticservice.service.TransManagementService;
 import com.dacn.logicsticservice.utils.GsonUtils;
 import com.google.gson.Gson;
@@ -231,6 +234,39 @@ public class TransManagementServiceImpl implements TransManagementService {
         });
 
         return statusMap;
+    }
+
+    @Override
+    public BaseResponseDTO getDijkstra() {
+        int firstStep = 1;
+        Map<Integer, Vert> verts = new HashMap<>();
+        List<CMRouting> routings = routingRepository.getAllRouting();
+        routings.stream().forEach(dto -> {
+            if (verts.get(dto.getRoutFirstStep()) == null ) {
+                Vert vert = new Vert("Vert" + dto.getRoutFirstStep());
+                verts.put(dto.getRoutFirstStep(), vert);
+            }
+
+            if (verts.get(dto.getRoutLastStep()) == null ) {
+                Vert vert = new Vert("Vert" + dto.getRoutLastStep());
+                verts.put(dto.getRoutLastStep(), vert);
+            }
+        });
+
+        routings.stream().forEach(routingPrevious -> {
+            verts.get(routingPrevious.getRoutFirstStep()).addNeighbour(new Edge(routingPrevious.getRoutTransitTime(),
+                    verts.get(routingPrevious.getRoutFirstStep()), verts.get(routingPrevious.getRoutLastStep())));
+        });
+
+        LOGGER.info("verts: {}", verts.toString());
+
+        PathFinder shortestPath = new PathFinder();
+        shortestPath.ShortestP(verts.get(1));
+        for (int i = 2; i <= verts.size(); i++) {
+            System.out.println("\nKhoảng cách tối thiểu từ V1 đến V" + i + " là:" + verts.get(i).getDist());
+            System.out.println("\nĐường đi ngắn nhất từ V1 đến V" + i + " là:" + shortestPath.getShortestP(verts.get(i)));
+        }
+        return null;
     }
 
     private Boolean producerOrderRequest(Order order) {

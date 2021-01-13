@@ -23,4 +23,6 @@ public interface TransManagementService {
     BaseResponseDTO getOrderByFilter(Integer cusId, Integer orderId, Integer companyId);
 
     Map<Integer, String> getMapStatus();
+
+    BaseResponseDTO getDijkstra();
 }
