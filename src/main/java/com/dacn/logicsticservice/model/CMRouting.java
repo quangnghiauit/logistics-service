@@ -15,7 +15,7 @@ public class CMRouting {
     private String routCode;
 
     @Column(name = "RoutTransitTime")
-    private long routTransitTime;
+    private float routTransitTime;
 
     @Column(name = "RoutFirstStep")
     private int routFirstStep;
@@ -39,11 +39,11 @@ public class CMRouting {
         this.routCode = locCode;
     }
 
-    public long getRoutTransitTime() {
+    public float getRoutTransitTime() {
         return routTransitTime;
     }
 
-    public void setRoutTransitTime(long routTransitTime) {
+    public void setRoutTransitTime(float routTransitTime) {
         this.routTransitTime = routTransitTime;
     }
 

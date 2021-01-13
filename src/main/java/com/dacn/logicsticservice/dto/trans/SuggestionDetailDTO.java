@@ -1,9 +1,9 @@
 package com.dacn.logicsticservice.dto.trans;
 
+import com.dacn.logicsticservice.model.CMLocation;
 import com.dacn.logicsticservice.model.Company;
 import com.dacn.logicsticservice.model.RulRate;
 
-import javax.persistence.Column;
 import java.util.List;
 
 public class SuggestionDetailDTO {
@@ -17,6 +17,9 @@ public class SuggestionDetailDTO {
     private String validDate;
     private String applyDate;
     private List<SurchargeDTO> surcharges;
+    private CMLocation startLocation;
+    private CMLocation endLocation;
+    private RulRateDTO rulRate;
 
     public int getRulRateId() {
         return rulRateId;
@@ -88,6 +91,30 @@ public class SuggestionDetailDTO {
 
     public void setSurcharges(List<SurchargeDTO> surcharges) {
         this.surcharges = surcharges;
+    }
+
+    public CMLocation getStartLocation() {
+        return startLocation;
+    }
+
+    public void setStartLocation(CMLocation startLocation) {
+        this.startLocation = startLocation;
+    }
+
+    public CMLocation getEndLocation() {
+        return endLocation;
+    }
+
+    public void setEndLocation(CMLocation endLocation) {
+        this.endLocation = endLocation;
+    }
+
+    public RulRateDTO getRulRate() {
+        return rulRate;
+    }
+
+    public void setRulRate(RulRateDTO rulRate) {
+        this.rulRate = rulRate;
     }
 
     public void doMappingEntityToDTO(RulRate rulRate, Company company, float routTransitTime, List<SurchargeDTO> surchargeDTOS) {

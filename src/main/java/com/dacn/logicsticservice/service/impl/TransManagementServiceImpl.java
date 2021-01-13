@@ -381,6 +381,22 @@ public class TransManagementServiceImpl implements TransManagementService {
 
                 for (RulRate rulRate : rulRates) {
                     SuggestionDetailDTO dto = new SuggestionDetailDTO();
+                    CMLocation startLocation = locationRepository.getCMLocationById(routing.getRoutFirstStep());
+                    dto.setStartLocation(startLocation);
+
+                    CMLocation endLocation = locationRepository.getCMLocationById(routing.getRoutLastStep());
+                    dto.setEndLocation(endLocation);
+
+                    RulRateDTO rulRateDTO = new RulRateDTO();
+
+                    CMContainer container = containerRepository.getCMContainerById(rulRate.getContID());
+                    rulRateDTO.setContainer(container);
+
+                    rulRateDTO.setApplyDate(rulRate.getApplyDate());
+                    rulRateDTO.setValidDate(rulRate.getValidDate());
+
+                    dto.setRulRate(rulRateDTO);
+
                     Company company = companyRepository.getCompanyById(rulRate.getCompanyID());
 
                     List<RulsurCharge> rulsurCharges = rulsurChargeRepository.getRulsurChargeByRulRateID(rulRate.getId());
