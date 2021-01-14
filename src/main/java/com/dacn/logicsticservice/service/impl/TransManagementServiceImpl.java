@@ -387,15 +387,8 @@ public class TransManagementServiceImpl implements TransManagementService {
                     CMLocation endLocation = locationRepository.getCMLocationById(routing.getRoutLastStep());
                     dto.setEndLocation(endLocation);
 
-                    RulRateDTO rulRateDTO = new RulRateDTO();
-
                     CMContainer container = containerRepository.getCMContainerById(rulRate.getContID());
-                    rulRateDTO.setContainer(container);
-
-                    rulRateDTO.setApplyDate(rulRate.getApplyDate());
-                    rulRateDTO.setValidDate(rulRate.getValidDate());
-
-                    dto.setRulRate(rulRateDTO);
+                    dto.setContainer(container);
 
                     Company company = companyRepository.getCompanyById(rulRate.getCompanyID());
 

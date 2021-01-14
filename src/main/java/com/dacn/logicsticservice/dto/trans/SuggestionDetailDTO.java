@@ -1,5 +1,6 @@
 package com.dacn.logicsticservice.dto.trans;
 
+import com.dacn.logicsticservice.model.CMContainer;
 import com.dacn.logicsticservice.model.CMLocation;
 import com.dacn.logicsticservice.model.Company;
 import com.dacn.logicsticservice.model.RulRate;
@@ -19,7 +20,7 @@ public class SuggestionDetailDTO {
     private List<SurchargeDTO> surcharges;
     private CMLocation startLocation;
     private CMLocation endLocation;
-    private RulRateDTO rulRate;
+    private CMContainer container;
 
     public int getRulRateId() {
         return rulRateId;
@@ -109,12 +110,12 @@ public class SuggestionDetailDTO {
         this.endLocation = endLocation;
     }
 
-    public RulRateDTO getRulRate() {
-        return rulRate;
+    public CMContainer getContainer() {
+        return container;
     }
 
-    public void setRulRate(RulRateDTO rulRate) {
-        this.rulRate = rulRate;
+    public void setContainer(CMContainer container) {
+        this.container = container;
     }
 
     public void doMappingEntityToDTO(RulRate rulRate, Company company, float routTransitTime, List<SurchargeDTO> surchargeDTOS) {
