@@ -24,4 +24,6 @@ public interface TransManagementService {
     Map<Integer, String> getMapStatus();
 
     BaseResponseDTO getDijkstra();
+
+    BaseResponseDTO updateStatusOrder(Integer orderId, Integer rulrateId, Integer status);
 }

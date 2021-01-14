@@ -42,6 +42,7 @@ public class TransManagementServiceImpl implements TransManagementService {
     private final CMSurchargeRepository surchargeRepository;
     private final CMCurrencyRepository currencyRepository;
     private final OrderRepository orderRepository;
+    private final OrderDetailRepository orderDetailRepository;
     private final CMStatusRepository statusRepository;
 
     @Autowired
@@ -55,6 +56,7 @@ public class TransManagementServiceImpl implements TransManagementService {
                                       CMSurchargeRepository surchargeRepository,
                                       CMCurrencyRepository currencyRepository,
                                       OrderRepository orderRepository,
+                                      OrderDetailRepository orderDetailRepository,
                                       CMStatusRepository statusRepository) {
 
         this.companyRepository = companyRepository;
@@ -67,6 +69,7 @@ public class TransManagementServiceImpl implements TransManagementService {
         this.surchargeRepository = surchargeRepository;
         this.currencyRepository = currencyRepository;
         this.orderRepository = orderRepository;
+        this.orderDetailRepository = orderDetailRepository;
         this.statusRepository = statusRepository;
     }
 
@@ -167,7 +170,13 @@ public class TransManagementServiceImpl implements TransManagementService {
 
             Order order = new Order();
             order.doMappingEntity(request, receiverLocation, senderLocation);
-            orderRepository.save(order);
+            Order orderSaved = orderRepository.save(order);
+
+            OrderDetail orderDetail = new OrderDetail();
+            orderDetail.setOrderID(orderSaved.getId());
+            orderDetail.setRulID(orderSaved.getRulID());
+            orderDetail.setStatus(0);
+            orderDetailRepository.save(orderDetail);
 
             //producer kafka
 //            producerOrderRequest(order);
@@ -301,6 +310,28 @@ public class TransManagementServiceImpl implements TransManagementService {
 //            System.out.println("\nĐường đi ngắn nhất từ V1 đến V" + i + " là:" + shortestPath.getShortestP(verts.get(i)));
 //        }
         return null;
+    }
+
+    @Override
+    public BaseResponseDTO updateStatusOrder(Integer orderId, Integer rulrateId, Integer status) {
+        BaseResponseDTO response = new BaseResponseDTO();
+        try {
+            OrderDetail orderDetail = orderDetailRepository.getAllByOrderIDAndRulId(orderId, rulrateId);
+            LOGGER.info("orderDetail : {}", orderDetail);
+            if (orderDetail != null) {
+                orderDetail.setStatus(status);
+                orderDetailRepository.save(orderDetail);
+
+                Order order = orderRepository.getAllById(orderDetail.getOrderID());
+                order.setStatus(status);
+                orderRepository.save(order);
+                response.success(SUCCESSFUL.getMessage());
+            }
+        } catch (Exception ex) {
+            LOGGER.info("updateStatusOrder exception: {}", ex);
+            response.fail(ex.getMessage());
+        }
+        return response;
     }
 
     private List<Vert> initializeMapDijkstra(int start, int end) {
