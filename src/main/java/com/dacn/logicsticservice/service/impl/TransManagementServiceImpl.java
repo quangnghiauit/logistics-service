@@ -44,6 +44,7 @@ public class TransManagementServiceImpl implements TransManagementService {
     private final OrderRepository orderRepository;
     private final OrderDetailRepository orderDetailRepository;
     private final CMStatusRepository statusRepository;
+    private final UserAccountRepository userAccountRepository;
 
     @Autowired
     public TransManagementServiceImpl(CompanyRepository companyRepository,
@@ -57,7 +58,8 @@ public class TransManagementServiceImpl implements TransManagementService {
                                       CMCurrencyRepository currencyRepository,
                                       OrderRepository orderRepository,
                                       OrderDetailRepository orderDetailRepository,
-                                      CMStatusRepository statusRepository) {
+                                      CMStatusRepository statusRepository,
+                                      UserAccountRepository userAccountRepository) {
 
         this.companyRepository = companyRepository;
         this.customerRepository = customerRepository;
@@ -71,6 +73,7 @@ public class TransManagementServiceImpl implements TransManagementService {
         this.orderRepository = orderRepository;
         this.orderDetailRepository = orderDetailRepository;
         this.statusRepository = statusRepository;
+        this.userAccountRepository = userAccountRepository;
     }
 
     @Override
@@ -193,31 +196,8 @@ public class TransManagementServiceImpl implements TransManagementService {
     public BaseResponseDTO getOrderByFilter(Integer cusId, Integer orderId, Integer companyId) {
         BaseResponseDTO response = new BaseResponseDTO();
         List<OrderDTO> orderDTOS = new ArrayList<>();
-        List<Order> orders = new ArrayList<>();
         try {
-            if (Objects.nonNull(cusId)) {
-                orders = orderRepository.getAllByCusId(cusId);
-                LOGGER.info("getOrderByFilter with customerId: {}, response: {}", cusId, GsonUtils.toJsonString(orders));
-            }
-
-            if (Objects.nonNull(orderId)) {
-                orders = Collections.singletonList(orderRepository.getAllById(orderId));
-                LOGGER.info("getOrderByFilter with orderId: {}, response: {}", orderId, GsonUtils.toJsonString(orders));
-            }
-
-            if (Objects.nonNull(companyId)) {
-                List<RulRate> rulRates = rulRateRepository.getRulRateByCompanyID(companyId);
-                LOGGER.info("getRulRateByCompanyID with companyId: {}, response: {}", companyId, GsonUtils.toJsonString(rulRates));
-
-                List<Order> finalOrders = new ArrayList<>();
-                rulRates.stream().forEach(model -> {
-                    List<Order> orderByRulrate = orderRepository.getAllByRulID(model.getId());
-                    finalOrders.addAll(orderByRulrate);
-                });
-
-                orders = finalOrders;
-                LOGGER.info("getOrderByFilter with companyId: {}, response: {}", companyId, GsonUtils.toJsonString(orders));
-            }
+            List<Order> orders = getOrderByFilterParams(cusId, orderId, companyId);
 
             orders.stream().forEach(model -> {
                 OrderDTO orderDTO = new OrderDTO();
@@ -265,6 +245,49 @@ public class TransManagementServiceImpl implements TransManagementService {
             response.fail(ex.getMessage());
         }
         return response;
+    }
+
+    private List<Order> getOrderByFilterParams(Integer cusId, Integer orderId, Integer companyId) {
+        List<Order> orders = new ArrayList<>();
+        try {
+            if (Objects.nonNull(cusId)) {
+                UserAccount userAccount = userAccountRepository.getUserAccountByTypeAndUserId(1, cusId); // type 1 customer
+                LOGGER.info("getUserAccountByTypeAndUserId with type: 1, cusId: {}, useraccount: {}", cusId, userAccount);
+
+                if (userAccount != null) {
+                    orders = orderRepository.getAllByCusId(userAccount.getAccountID());
+                    LOGGER.info("getOrderByFilter with customerId: {}, response: {}", cusId, GsonUtils.toJsonString(orders));
+                }
+            }
+
+            if (Objects.nonNull(orderId)) {
+                orders = Collections.singletonList(orderRepository.getAllById(orderId));
+                LOGGER.info("getOrderByFilter with orderId: {}, response: {}", orderId, GsonUtils.toJsonString(orders));
+            }
+
+            if (Objects.nonNull(companyId)) {
+                UserAccount userAccount = userAccountRepository.getUserAccountByTypeAndUserId(2, companyId); // type 2 company
+                LOGGER.info("getUserAccountByTypeAndUserId with type: 2, companyId: {}, useraccount: {}", companyId, userAccount);
+
+                if (userAccount == null) {
+                    return orders;
+                }
+                List<RulRate> rulRates = rulRateRepository.getRulRateByCompanyID(userAccount.getAccountID());
+                LOGGER.info("getRulRateByCompanyID with companyId: {}, response: {}", companyId, GsonUtils.toJsonString(rulRates));
+
+                List<Order> finalOrders = new ArrayList<>();
+                rulRates.stream().forEach(model -> {
+                    List<Order> orderByRulrate = orderRepository.getAllByRulID(model.getId());
+                    finalOrders.addAll(orderByRulrate);
+                });
+
+                orders = finalOrders;
+                LOGGER.info("getOrderByFilter with companyId: {}, response: {}", companyId, GsonUtils.toJsonString(orders));
+            }
+        } catch (Exception ex) {
+            LOGGER.info("getOrderByFilterParams ex: {}", ex);
+        }
+        return orders;
     }
 
     @Override
