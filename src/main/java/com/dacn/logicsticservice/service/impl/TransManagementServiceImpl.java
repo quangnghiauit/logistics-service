@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 
 import static com.dacn.logicsticservice.enumeration.ReturnCodeEnum.SUCCESSFUL;
@@ -432,7 +433,7 @@ public class TransManagementServiceImpl implements TransManagementService {
             SuggestionResponseDTO responseDTO = new SuggestionResponseDTO();
             cmRoutings.forEach(routing -> {
                 List<RulRate> rulRates = rulRateRepository.getRulRateByRoutId(routing.getId());
-
+                List<SuggestionDetailDTO> listTemp = new ArrayList<>();
                 for (RulRate rulRate : rulRates) {
                     SuggestionDetailDTO dto = new SuggestionDetailDTO();
                     CMLocation startLocation = locationRepository.getCMLocationById(routing.getRoutFirstStep());
@@ -462,7 +463,11 @@ public class TransManagementServiceImpl implements TransManagementService {
                         surchargeDTOS.add(surchargeDTO);
                     }
                     dto.doMappingEntityToDTO(rulRate, company, routing.getRoutTransitTime(), surchargeDTOS);
-                    suggestionDetailDTOS.add(dto);
+                    listTemp.add(dto);
+                }
+                List<SuggestionDetailDTO> listFinal = listTemp.stream().sorted(Comparator.comparingDouble(SuggestionDetailDTO::getAmount)).collect(Collectors.toList());
+                if (!listFinal.isEmpty()) {
+                    suggestionDetailDTOS.add(listFinal.get(0));
                 }
             });
             responseDTO.setSuggestionDetailDTOS(suggestionDetailDTOS);
