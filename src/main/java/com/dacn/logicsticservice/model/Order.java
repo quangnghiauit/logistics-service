@@ -181,8 +181,8 @@ public class Order {
 
     public void doMappingEntity(OrderRequest request, CMLocation receiverLocation, CMLocation senderLocation) {
         this.rulID = request.getRulID();
-        this.cusID = request.getCusID();
-        this.status = request.getStatus();
+//        this.cusID = request.getCusID();
+//        this.status = request.getStatus();
         this.totalAmount = request.getTotalAmount();
         this.receiverName = request.getReceiverName();
         this.receiverPhone = Integer.parseInt(request.getReceiverPhone());

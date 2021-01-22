@@ -1,5 +1,7 @@
 package com.dacn.logicsticservice.dto.request;
 
+import java.util.List;
+
 public class OrderRequest {
     private int cusID;
     private int rulID;
@@ -21,6 +23,7 @@ public class OrderRequest {
     private String locDescriptionSender;
     private String typeProduct;
     private String description;
+    private List<Integer> rulrateIds;
 
     public int getCusID() {
         return cusID;
@@ -180,5 +183,13 @@ public class OrderRequest {
 
     public void setSenderPhone(String senderPhone) {
         this.senderPhone = senderPhone;
+    }
+
+    public List<Integer> getRulrateIds() {
+        return rulrateIds;
+    }
+
+    public void setRulrateIds(List<Integer> rulrateIds) {
+        this.rulrateIds = rulrateIds;
     }
 }
