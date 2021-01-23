@@ -19,11 +19,13 @@ public interface TransManagementService {
 
     BaseResponseDTO createOrder(OrderRequest request);
 
-    BaseResponseDTO getOrderByFilter(Integer cusId, Integer orderId, Integer companyId);
+    BaseResponseDTO getOrderByOrderId(Integer orderId);
+
+    BaseResponseDTO getOrderByCustomerId(Integer customerId);
+
+    BaseResponseDTO getOrderByCompanyId(Integer companyId);
 
     Map<Integer, String> getMapStatus();
-
-    BaseResponseDTO getDijkstra();
 
     BaseResponseDTO updateStatusOrder(Integer orderId, Integer rulrateId, Integer status);
 }

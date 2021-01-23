@@ -1,19 +1,14 @@
 package com.dacn.logicsticservice.dto.trans;
 
 
-import com.dacn.logicsticservice.dto.request.OrderRequest;
 import com.dacn.logicsticservice.model.CMLocation;
 import com.dacn.logicsticservice.model.Customer;
 import com.dacn.logicsticservice.model.Order;
-import com.dacn.logicsticservice.utils.DateTimeUtils;
-import org.apache.commons.lang3.math.NumberUtils;
-
-import javax.persistence.*;
 
 public class OrderDTO {
 
-    private int id;
-    private int rulID;
+    private int orderId;
+//    private int rulID;
     private int cusID;
     private Customer customerInfo;
     private String createdDate;
@@ -32,21 +27,21 @@ public class OrderDTO {
     private CMLocation senderLocation;
 
 
-    public int getId() {
-        return id;
+    public int getOrderId() {
+        return orderId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setOrderId(int orderId) {
+        this.orderId = orderId;
     }
 
-    public int getRulID() {
-        return rulID;
-    }
-
-    public void setRulID(int rulID) {
-        this.rulID = rulID;
-    }
+//    public int getRulID() {
+//        return rulID;
+//    }
+//
+//    public void setRulID(int rulID) {
+//        this.rulID = rulID;
+//    }
 
     public int getCusID() {
         return cusID;
@@ -177,7 +172,7 @@ public class OrderDTO {
     }
 
     public void doMappingEntity(Order request) {
-        this.rulID = request.getRulID();
+        this.orderId = request.getId();
         this.cusID = request.getCusID();
         this.status = request.getStatus();
         this.totalAmount = request.getTotalAmount();

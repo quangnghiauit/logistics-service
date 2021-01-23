@@ -13,6 +13,7 @@ import com.dacn.logicsticservice.service.PathFinder;
 import com.dacn.logicsticservice.service.TransManagementService;
 import com.dacn.logicsticservice.utils.GsonUtils;
 import com.google.gson.Gson;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -201,101 +202,193 @@ public class TransManagementServiceImpl implements TransManagementService {
     }
 
     @Override
-    public BaseResponseDTO getOrderByFilter(Integer cusId, Integer orderId, Integer companyId) {
+    public BaseResponseDTO getOrderByOrderId(Integer orderId) {
         BaseResponseDTO response = new BaseResponseDTO();
-        List<OrderDTO> orderDTOS = new ArrayList<>();
+        List<OrderDetailResponse> orderDetailResponses = new ArrayList<>();
         try {
-            List<Order> orders = getOrderByFilterParams(cusId, orderId, companyId);
+            if (orderId ==null) {
+                return response.fail("Check null orderId");
+            }
+            Order order = orderRepository.getAllById(orderId);
+            OrderDetailResponse detailResponse = new OrderDetailResponse();
+            OrderDTO orderDTO = new OrderDTO();
+            orderDTO.doMappingEntity(order);
+            detailResponse.setOrder(orderDTO);
 
-            orders.stream().forEach(model -> {
-                OrderDTO orderDTO = new OrderDTO();
+            List<OrderDetail> orderDetails = orderDetailRepository.getAllByOrderID(order.getId());
+            List<SuggestionDetailDTO> orderdetails = new ArrayList<>();
+            orderDetails.forEach(orderDetail -> {
+                SuggestionDetailDTO dto = new SuggestionDetailDTO();
+                CMLocation startLocation = locationRepository.getCMLocationById(order.getSenderLocation());
+                dto.setStartLocation(startLocation);
 
-                Customer customerInfo = customerRepository.getCustomerByID(model.getCusID());
-                orderDTO.setCustomerInfo(customerInfo);
+                CMLocation endLocation = locationRepository.getCMLocationById(order.getReceiveLocation());
+                dto.setEndLocation(endLocation);
 
-                CMLocation receiverLocation = locationRepository.getCMLocationById(model.getReceiveLocation());
-                orderDTO.setReceiverLocation(receiverLocation);
+                RulRate rulRate = rulRateRepository.getRulRateById(orderDetail.getRulID());
 
-                CMLocation senderLocation = locationRepository.getCMLocationById(model.getSenderLocation());
-                orderDTO.setSenderLocation(senderLocation);
+                CMContainer container = containerRepository.getCMContainerById(rulRate.getContID());
+                dto.setContainer(container);
 
-                CMStatus status = statusRepository.getCMStatusById(model.getStatus());
-                orderDTO.setStatusMessage(status.getName());
+                Company company = companyRepository.getCompanyById(rulRate.getCompanyID());
 
-                RulRate rulRate = rulRateRepository.getRulRateById(model.getRulID());
-                if (rulRate != null) {
-                    RulRateDTO rulRateDTO = new RulRateDTO();
-                    CMRouting routing = routingRepository.getCMRoutingById(rulRate.getRoutID());
-                    rulRateDTO.setRouting(routing);
+                List<RulsurCharge> rulsurCharges = rulsurChargeRepository.getRulsurChargeByRulRateID(rulRate.getId());
+                List<SurchargeDTO> surchargeDTOS = new ArrayList<>();
+                for (RulsurCharge rulsurCharge : rulsurCharges) {
+                    SurchargeDTO surchargeDTO = new SurchargeDTO();
+                    surchargeDTO.setAmount(rulsurCharge.getAmount());
+                    surchargeDTO.setId(rulsurCharge.getSurID());
 
-                    CMContainer container = containerRepository.getCMContainerById(rulRate.getContID());
-                    rulRateDTO.setContainer(container);
+                    CMSurcharge surcharge = surchargeRepository.getCMSurchargeById(rulsurCharge.getSurID());
+                    surchargeDTO.setSurCode(surcharge.getSurCode());
+                    surchargeDTO.setSurName(surcharge.getSurName());
 
-                    Company company = companyRepository.getCompanyById(rulRate.getCompanyID());
-                    rulRateDTO.setCompany(company);
-
-                    rulRateDTO.setApplyDate(rulRate.getApplyDate());
-                    rulRateDTO.setValidDate(rulRate.getValidDate());
-
-                    orderDTO.setRulRate(rulRateDTO);
+                    CMCurrency currency = currencyRepository.getCMCurrencyById(rulsurCharge.getCurrencyId());
+                    surchargeDTO.setCurrencyName(currency.getCurName());
+                    surchargeDTOS.add(surchargeDTO);
                 }
-
-
-                orderDTO.doMappingEntity(model);
-                orderDTOS.add(orderDTO);
+                CMRouting routing = routingRepository.getCMRoutingById(rulRate.getRoutID());
+                dto.doMappingEntityToDTO(rulRate, company, routing.getRoutTransitTime(), surchargeDTOS);
+                orderdetails.add(dto);
             });
+            detailResponse.setOrderDetails(orderdetails);
+            orderDetailResponses.add(detailResponse);
 
-            LOGGER.info("getOrderByFilter: {}", GsonUtils.toJsonString(orderDTOS));
-
-            response.success(SUCCESSFUL.getMessage(), orderDTOS);
+            response.success(orderDetailResponses);
         } catch (Exception ex) {
-            LOGGER.info("getOrderByFilter exception: {}", ex);
+            LOGGER.info("getOrderByOrderId with orderId: {}, ex: {}", orderId, ex);
             response.fail(ex.getMessage());
         }
         return response;
     }
 
-    private List<Order> getOrderByFilterParams(Integer cusId, Integer orderId, Integer companyId) {
-        List<Order> orders = new ArrayList<>();
+    @Override
+    public BaseResponseDTO getOrderByCustomerId(Integer customerId) {
+        BaseResponseDTO response = new BaseResponseDTO();
+        List<OrderDetailResponse> orderDetailResponses = new ArrayList<>();
         try {
-            if (Objects.nonNull(cusId)) {
-                UserAccount userAccount = userAccountRepository.getUserAccountByTypeAndUserId(1, cusId); // type 1 customer
-                LOGGER.info("getUserAccountByTypeAndUserId with type: 1, cusId: {}, useraccount: {}", cusId, userAccount);
-
-                if (userAccount != null) {
-                    orders = orderRepository.getAllByCusId(userAccount.getAccountID());
-                    LOGGER.info("getOrderByFilter with customerId: {}, response: {}", cusId, GsonUtils.toJsonString(orders));
-                }
+            if (customerId ==null) {
+                return response.fail("Check null customerId");
             }
+            List<Order> orders = orderRepository.getAllByCusId(customerId);
 
-            if (Objects.nonNull(orderId)) {
-                orders = Collections.singletonList(orderRepository.getAllById(orderId));
-                LOGGER.info("getOrderByFilter with orderId: {}, response: {}", orderId, GsonUtils.toJsonString(orders));
-            }
+            orders.forEach(order -> {
+                OrderDetailResponse detailResponse = new OrderDetailResponse();
+                OrderDTO orderDTO = new OrderDTO();
+                orderDTO.doMappingEntity(order);
+                detailResponse.setOrder(orderDTO);
 
-            if (Objects.nonNull(companyId)) {
-                UserAccount userAccount = userAccountRepository.getUserAccountByTypeAndUserId(2, companyId); // type 2 company
-                LOGGER.info("getUserAccountByTypeAndUserId with type: 2, companyId: {}, useraccount: {}", companyId, userAccount);
+                List<OrderDetail> orderDetails = orderDetailRepository.getAllByOrderID(order.getId());
+                List<SuggestionDetailDTO> orderdetails = new ArrayList<>();
+                orderDetails.forEach(orderDetail -> {
+                    SuggestionDetailDTO dto = new SuggestionDetailDTO();
+                    CMLocation startLocation = locationRepository.getCMLocationById(order.getSenderLocation());
+                    dto.setStartLocation(startLocation);
 
-                if (userAccount == null) {
-                    return orders;
-                }
-                List<RulRate> rulRates = rulRateRepository.getRulRateByCompanyID(userAccount.getAccountID());
-                LOGGER.info("getRulRateByCompanyID with companyId: {}, response: {}", companyId, GsonUtils.toJsonString(rulRates));
+                    CMLocation endLocation = locationRepository.getCMLocationById(order.getReceiveLocation());
+                    dto.setEndLocation(endLocation);
 
-                List<Order> finalOrders = new ArrayList<>();
-                rulRates.stream().forEach(model -> {
-                    List<Order> orderByRulrate = orderRepository.getAllByRulID(model.getId());
-                    finalOrders.addAll(orderByRulrate);
+                    RulRate rulRate = rulRateRepository.getRulRateById(orderDetail.getRulID());
+
+                    CMContainer container = containerRepository.getCMContainerById(rulRate.getContID());
+                    dto.setContainer(container);
+
+                    Company company = companyRepository.getCompanyById(rulRate.getCompanyID());
+
+                    List<RulsurCharge> rulsurCharges = rulsurChargeRepository.getRulsurChargeByRulRateID(rulRate.getId());
+                    List<SurchargeDTO> surchargeDTOS = new ArrayList<>();
+                    for (RulsurCharge rulsurCharge : rulsurCharges) {
+                        SurchargeDTO surchargeDTO = new SurchargeDTO();
+                        surchargeDTO.setAmount(rulsurCharge.getAmount());
+                        surchargeDTO.setId(rulsurCharge.getSurID());
+
+                        CMSurcharge surcharge = surchargeRepository.getCMSurchargeById(rulsurCharge.getSurID());
+                        surchargeDTO.setSurCode(surcharge.getSurCode());
+                        surchargeDTO.setSurName(surcharge.getSurName());
+
+                        CMCurrency currency = currencyRepository.getCMCurrencyById(rulsurCharge.getCurrencyId());
+                        surchargeDTO.setCurrencyName(currency.getCurName());
+                        surchargeDTOS.add(surchargeDTO);
+                    }
+                    CMRouting routing = routingRepository.getCMRoutingById(rulRate.getRoutID());
+                    dto.doMappingEntityToDTO(rulRate, company, routing.getRoutTransitTime(), surchargeDTOS);
+                    orderdetails.add(dto);
                 });
+                detailResponse.setOrderDetails(orderdetails);
+                orderDetailResponses.add(detailResponse);
+            });
 
-                orders = finalOrders;
-                LOGGER.info("getOrderByFilter with companyId: {}, response: {}", companyId, GsonUtils.toJsonString(orders));
-            }
+            response.success(orderDetailResponses);
         } catch (Exception ex) {
-            LOGGER.info("getOrderByFilterParams ex: {}", ex);
+            LOGGER.info("getOrderByCustomerId with customerId: {}, ex: {}", customerId, ex);
+            response.fail(ex.getMessage());
         }
-        return orders;
+        return response;
+    }
+
+    @Override
+    public BaseResponseDTO getOrderByCompanyId(Integer companyId) {
+        BaseResponseDTO response = new BaseResponseDTO();
+        List<OrderDetailResponse> orderDetailResponses = new ArrayList<>();
+        try {
+            if (companyId ==null) {
+                return response.fail("Check null companyId");
+            }
+            UserAccount userAccount = userAccountRepository.getUserAccountByTypeAndUserId(2, companyId);
+            List<RulRate> rulRates = rulRateRepository.getRulRateByCompanyID(userAccount.getAccountID());
+            rulRates.forEach(rulRate -> {
+                List<OrderDetail> orderDetails = orderDetailRepository.getAllByRulId(rulRate.getId());
+                orderDetails.forEach(orderDetail -> {
+                    Order order = orderRepository.getAllById(orderDetail.getOrderID());
+                    OrderDetailResponse detailResponse = new OrderDetailResponse();
+                    OrderDTO orderDTO = new OrderDTO();
+                    orderDTO.doMappingEntity(order);
+                    detailResponse.setOrder(orderDTO);
+
+                    List<SuggestionDetailDTO> detailDTOList = new ArrayList<>();
+
+                    SuggestionDetailDTO dto = new SuggestionDetailDTO();
+                    CMLocation startLocation = locationRepository.getCMLocationById(order.getSenderLocation());
+                    dto.setStartLocation(startLocation);
+
+                    CMLocation endLocation = locationRepository.getCMLocationById(order.getReceiveLocation());
+                    dto.setEndLocation(endLocation);
+
+                    CMContainer container = containerRepository.getCMContainerById(rulRate.getContID());
+                    dto.setContainer(container);
+
+                    Company company = companyRepository.getCompanyById(rulRate.getCompanyID());
+
+                    List<RulsurCharge> rulsurCharges = rulsurChargeRepository.getRulsurChargeByRulRateID(rulRate.getId());
+                    List<SurchargeDTO> surchargeDTOS = new ArrayList<>();
+                    for (RulsurCharge rulsurCharge : rulsurCharges) {
+                        SurchargeDTO surchargeDTO = new SurchargeDTO();
+                        surchargeDTO.setAmount(rulsurCharge.getAmount());
+                        surchargeDTO.setId(rulsurCharge.getSurID());
+
+                        CMSurcharge surcharge = surchargeRepository.getCMSurchargeById(rulsurCharge.getSurID());
+                        surchargeDTO.setSurCode(surcharge.getSurCode());
+                        surchargeDTO.setSurName(surcharge.getSurName());
+
+                        CMCurrency currency = currencyRepository.getCMCurrencyById(rulsurCharge.getCurrencyId());
+                        surchargeDTO.setCurrencyName(currency.getCurName());
+                        surchargeDTOS.add(surchargeDTO);
+                    }
+                    CMRouting routing = routingRepository.getCMRoutingById(rulRate.getRoutID());
+                    dto.doMappingEntityToDTO(rulRate, company, routing.getRoutTransitTime(), surchargeDTOS);
+                    detailDTOList.add(dto);
+
+                    detailResponse.setOrderDetails(detailDTOList);
+                    orderDetailResponses.add(detailResponse);
+                });
+            });
+
+            response.success(orderDetailResponses);
+        } catch (Exception ex) {
+            LOGGER.info("getOrderByCompanyId with companyId: {}, ex: {}", companyId, ex);
+            response.fail(ex.getMessage());
+        }
+        return response;
     }
 
     @Override
@@ -308,39 +401,6 @@ public class TransManagementServiceImpl implements TransManagementService {
         });
 
         return statusMap;
-    }
-
-    @Override
-    public BaseResponseDTO getDijkstra() {
-//        int firstStep = 1;
-//        Map<Integer, Vert> verts = new HashMap<>();
-//        List<CMRouting> routings = routingRepository.getAllRouting();
-//        routings.stream().forEach(dto -> {
-//            if (verts.get(dto.getRoutFirstStep()) == null ) {
-//                Vert vert = new Vert("Vert" + dto.getRoutFirstStep());
-//                verts.put(dto.getRoutFirstStep(), vert);
-//            }
-//
-//            if (verts.get(dto.getRoutLastStep()) == null ) {
-//                Vert vert = new Vert("Vert" + dto.getRoutLastStep());
-//                verts.put(dto.getRoutLastStep(), vert);
-//            }
-//        });
-//
-//        routings.stream().forEach(routingPrevious -> {
-//            verts.get(routingPrevious.getRoutFirstStep()).addNeighbour(new Edge(routingPrevious.getRoutTransitTime(),
-//                    verts.get(routingPrevious.getRoutFirstStep()), verts.get(routingPrevious.getRoutLastStep())));
-//        });
-//
-//        LOGGER.info("verts: {}", verts.toString());
-//
-//        PathFinder shortestPath = new PathFinder();
-//        shortestPath.ShortestP(verts.get(1));
-//        for (int i = 2; i <= verts.size(); i++) {
-//            System.out.println("\nKhoảng cách tối thiểu từ V1 đến V" + i + " là:" + verts.get(i).getDist());
-//            System.out.println("\nĐường đi ngắn nhất từ V1 đến V" + i + " là:" + shortestPath.getShortestP(verts.get(i)));
-//        }
-        return null;
     }
 
     @Override
@@ -434,7 +494,6 @@ public class TransManagementServiceImpl implements TransManagementService {
 
 
             List<CMRouting> cmRoutings = getListRouting(input);
-//            CMRouting routing = routingRepository.getCMRoutingByFirstLastStep(senderLocation.getId(), receiverLocation.getId());
             LOGGER.info("routing: {}", GsonUtils.toJsonString(cmRoutings));
 
             SuggestionResponseDTO responseDTO = new SuggestionResponseDTO();

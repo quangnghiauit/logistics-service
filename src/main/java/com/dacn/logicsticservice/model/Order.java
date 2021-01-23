@@ -17,8 +17,8 @@ public class Order {
     @Column(name ="ID")
     private int id;
 
-    @Column(name ="RulID")
-    private int rulID;
+//    @Column(name ="RulID")
+//    private int rulID;
 
     @Column(name ="CusID")
     private int cusID;
@@ -67,13 +67,13 @@ public class Order {
         this.id = id;
     }
 
-    public int getRulID() {
-        return rulID;
-    }
-
-    public void setRulID(int rulID) {
-        this.rulID = rulID;
-    }
+//    public int getRulID() {
+//        return rulID;
+//    }
+//
+//    public void setRulID(int rulID) {
+//        this.rulID = rulID;
+//    }
 
     public int getCusID() {
         return cusID;
@@ -180,7 +180,7 @@ public class Order {
     }
 
     public void doMappingEntity(OrderRequest request, CMLocation receiverLocation, CMLocation senderLocation) {
-        this.rulID = request.getRulID();
+//        this.rulID = request.getRulID();
 //        this.cusID = request.getCusID();
 //        this.status = request.getStatus();
         this.totalAmount = request.getTotalAmount();
