@@ -62,6 +62,13 @@ public class DateTimeUtils {
     return dateFormat.format(date);
   }
 
+  public static String convertDateToCurrentDateTime(String dateInput) {
+    DateFormat dateFormat = new SimpleDateFormat(DATE_YYYY_MM_DD_HH_MM_SS_FORMAT);
+    dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
+    Date date = convertDate(dateInput, DATE_FORMAT);
+    return dateFormat.format(date);
+  }
+
   public static String getCurrentDateTime(String format) {
     DateFormat dateFormat = new SimpleDateFormat(format);
     Date date = new Date();

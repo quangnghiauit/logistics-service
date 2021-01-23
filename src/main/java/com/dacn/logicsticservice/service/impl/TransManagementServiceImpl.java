@@ -11,6 +11,7 @@ import com.dacn.logicsticservice.model.*;
 import com.dacn.logicsticservice.repository.*;
 import com.dacn.logicsticservice.service.PathFinder;
 import com.dacn.logicsticservice.service.TransManagementService;
+import com.dacn.logicsticservice.utils.DateTimeUtils;
 import com.dacn.logicsticservice.utils.GsonUtils;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
@@ -417,6 +418,9 @@ public class TransManagementServiceImpl implements TransManagementService {
 
                 Order order = orderRepository.getAllById(orderDetail.getOrderID());
                 order.setStatus(status);
+                if (status == 4) {
+                    order.setRecieveDate(DateTimeUtils.getCurrentDateTime());
+                }
                 orderRepository.save(order);
                 response.success(SUCCESSFUL.getMessage());
             }

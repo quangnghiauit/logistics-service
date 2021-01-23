@@ -6,6 +6,7 @@ public class UserDTO {
 
     private int id;
     private String userName;
+    private String fullName;
     private String email;
     private int userType;
 
@@ -39,6 +40,14 @@ public class UserDTO {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     public void doMappingEntity(Users user) {

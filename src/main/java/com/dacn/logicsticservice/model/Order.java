@@ -59,6 +59,12 @@ public class Order {
     @Column(name ="SenderLocation")
     private int senderLocation;
 
+    @Column(name ="ExpectedDate")
+    private String expectedDate;
+
+    @Column(name ="RecieveDate")
+    private String recieveDate;
+
     public int getId() {
         return id;
     }
@@ -179,6 +185,22 @@ public class Order {
         this.senderLocation = senderLocation;
     }
 
+    public String getExpectedDate() {
+        return expectedDate;
+    }
+
+    public void setExpectedDate(String expectedDate) {
+        this.expectedDate = expectedDate;
+    }
+
+    public String getRecieveDate() {
+        return recieveDate;
+    }
+
+    public void setRecieveDate(String recieveDate) {
+        this.recieveDate = recieveDate;
+    }
+
     public void doMappingEntity(OrderRequest request, CMLocation receiverLocation, CMLocation senderLocation) {
 //        this.rulID = request.getRulID();
 //        this.cusID = request.getCusID();
@@ -195,6 +217,7 @@ public class Order {
         this.typeProduct = request.getTypeProduct();
         this.description = request.getDescription();
         this.createdDate = DateTimeUtils.getCurrentDateTime();
+        this.expectedDate = DateTimeUtils.convertDateToCurrentDateTime(request.getExpectedDate());
 
         this.senderName = request.getSenderName();
         if (NumberUtils.isDigits(request.getSenderPhone())) {

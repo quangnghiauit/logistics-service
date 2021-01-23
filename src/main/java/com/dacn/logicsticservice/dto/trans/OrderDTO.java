@@ -5,10 +5,13 @@ import com.dacn.logicsticservice.model.CMLocation;
 import com.dacn.logicsticservice.model.Customer;
 import com.dacn.logicsticservice.model.Order;
 
+import javax.persistence.Column;
+
 public class OrderDTO {
 
     private int orderId;
-//    private int rulID;
+    private String expectedDate;
+    private String recieveDate;
     private int cusID;
     private Customer customerInfo;
     private String createdDate;
@@ -35,13 +38,21 @@ public class OrderDTO {
         this.orderId = orderId;
     }
 
-//    public int getRulID() {
-//        return rulID;
-//    }
-//
-//    public void setRulID(int rulID) {
-//        this.rulID = rulID;
-//    }
+    public String getExpectedDate() {
+        return expectedDate;
+    }
+
+    public void setExpectedDate(String expectedDate) {
+        this.expectedDate = expectedDate;
+    }
+
+    public String getRecieveDate() {
+        return recieveDate;
+    }
+
+    public void setRecieveDate(String recieveDate) {
+        this.recieveDate = recieveDate;
+    }
 
     public int getCusID() {
         return cusID;
@@ -173,6 +184,8 @@ public class OrderDTO {
 
     public void doMappingEntity(Order request) {
         this.orderId = request.getId();
+        this.expectedDate = request.getExpectedDate();
+        this.recieveDate = request.getRecieveDate();
         this.cusID = request.getCusID();
         this.status = request.getStatus();
         this.totalAmount = request.getTotalAmount();

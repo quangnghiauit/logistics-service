@@ -3,6 +3,9 @@ package com.dacn.logicsticservice.service.impl;
 import com.dacn.logicsticservice.dto.user.UserDTO;
 import com.dacn.logicsticservice.dto.user.UserRegister;
 import com.dacn.logicsticservice.dto.response.BaseResponseDTO;
+import com.dacn.logicsticservice.model.Company;
+import com.dacn.logicsticservice.model.Customer;
+import com.dacn.logicsticservice.model.UserAccount;
 import com.dacn.logicsticservice.model.Users;
 import com.dacn.logicsticservice.repository.*;
 import com.dacn.logicsticservice.service.UserManagementService;
@@ -17,11 +20,20 @@ public class UserManagementServiceImpl implements UserManagementService {
     private static Logger LOGGER = LoggerFactory.getLogger(UserManagementServiceImpl.class);
 
     private final UserRepository userRepository;
+    private final CompanyRepository companyRepository;
+    private final CustomerRepository customerRepository;
+    private final UserAccountRepository userAccountRepository;
 
     @Autowired
-    public UserManagementServiceImpl(UserRepository userRepository) {
+    public UserManagementServiceImpl(CompanyRepository companyRepository,
+                                     CustomerRepository customerRepository,
+                                     UserRepository userRepository,
+                                     UserAccountRepository userAccountRepository) {
 
+        this.companyRepository = companyRepository;
+        this.customerRepository = customerRepository;
         this.userRepository = userRepository;
+        this.userAccountRepository = userAccountRepository;
     }
 
     @Override
@@ -60,6 +72,17 @@ public class UserManagementServiceImpl implements UserManagementService {
             if (user != null) {
                 UserDTO userDTO = new UserDTO();
                 userDTO.doMappingEntity(user);
+
+                String fullName = "";
+                UserAccount userAccount = userAccountRepository.getUserAccountByTypeAndUserId(user.getUserType(), user.getId());
+                if (user.getUserType() == 1) {
+                    Customer customer = customerRepository.getCustomerByID(userAccount.getAccountID());
+                    fullName = customer.getCusLastName() + " " + customer.getCusFirstName();
+                } else if (user.getUserType() == 2) {
+                    Company company = companyRepository.getCompanyById(userAccount.getAccountID());
+                    fullName = company.getCoName();
+                }
+                userDTO.setFullName(fullName);
                 LOGGER.info("User login successfully... : {}", GsonUtils.toJsonString(userDTO));
                 return response.success(userDTO);
             }

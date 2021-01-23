@@ -24,6 +24,7 @@ public class OrderRequest {
     private String typeProduct;
     private String description;
     private List<Integer> rulrateIds;
+    private String expectedDate;
 
     public int getCusID() {
         return cusID;
@@ -191,5 +192,13 @@ public class OrderRequest {
 
     public void setRulrateIds(List<Integer> rulrateIds) {
         this.rulrateIds = rulrateIds;
+    }
+
+    public String getExpectedDate() {
+        return expectedDate;
+    }
+
+    public void setExpectedDate(String expectedDate) {
+        this.expectedDate = expectedDate;
     }
 }
