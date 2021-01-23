@@ -10,6 +10,7 @@ import java.util.List;
 public class SuggestionDetailDTO {
 
     private int rulRateId;
+    private int status;
     private String companyName;
     private String coDescription;
     private float transitTime;
@@ -116,6 +117,14 @@ public class SuggestionDetailDTO {
 
     public void setContainer(CMContainer container) {
         this.container = container;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 
     public void doMappingEntityToDTO(RulRate rulRate, Company company, float routTransitTime, List<SurchargeDTO> surchargeDTOS) {

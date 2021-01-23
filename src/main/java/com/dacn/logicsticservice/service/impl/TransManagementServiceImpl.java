@@ -282,6 +282,7 @@ public class TransManagementServiceImpl implements TransManagementService {
                 List<SuggestionDetailDTO> orderdetails = new ArrayList<>();
                 orderDetails.forEach(orderDetail -> {
                     SuggestionDetailDTO dto = new SuggestionDetailDTO();
+                    dto.setStatus(orderDetail.getStatus());
                     CMLocation startLocation = locationRepository.getCMLocationById(order.getSenderLocation());
                     dto.setStartLocation(startLocation);
 
@@ -348,6 +349,7 @@ public class TransManagementServiceImpl implements TransManagementService {
                     List<SuggestionDetailDTO> detailDTOList = new ArrayList<>();
 
                     SuggestionDetailDTO dto = new SuggestionDetailDTO();
+                    dto.setStatus(orderDetail.getStatus());
                     CMLocation startLocation = locationRepository.getCMLocationById(order.getSenderLocation());
                     dto.setStartLocation(startLocation);
 
