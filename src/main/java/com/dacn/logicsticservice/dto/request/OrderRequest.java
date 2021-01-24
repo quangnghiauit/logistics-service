@@ -1,5 +1,6 @@
 package com.dacn.logicsticservice.dto.request;
 
+import javax.persistence.Column;
 import java.util.List;
 
 public class OrderRequest {
@@ -25,6 +26,8 @@ public class OrderRequest {
     private String description;
     private List<Integer> rulrateIds;
     private String expectedDate;
+    private String recieveAddress;
+    private String senderAddress;
 
     public int getCusID() {
         return cusID;
@@ -200,5 +203,21 @@ public class OrderRequest {
 
     public void setExpectedDate(String expectedDate) {
         this.expectedDate = expectedDate;
+    }
+
+    public String getRecieveAddress() {
+        return recieveAddress;
+    }
+
+    public void setRecieveAddress(String recieveAddress) {
+        this.recieveAddress = recieveAddress;
+    }
+
+    public String getSenderAddress() {
+        return senderAddress;
+    }
+
+    public void setSenderAddress(String senderAddress) {
+        this.senderAddress = senderAddress;
     }
 }

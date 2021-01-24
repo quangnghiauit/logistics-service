@@ -65,6 +65,12 @@ public class Order {
     @Column(name ="RecieveDate")
     private String recieveDate;
 
+    @Column(name ="RecieveAddress")
+    private String recieveAddress;
+
+    @Column(name ="SenderAddress")
+    private String senderAddress;
+
     public int getId() {
         return id;
     }
@@ -201,6 +207,22 @@ public class Order {
         this.recieveDate = recieveDate;
     }
 
+    public String getRecieveAddress() {
+        return recieveAddress;
+    }
+
+    public void setRecieveAddress(String recieveAddress) {
+        this.recieveAddress = recieveAddress;
+    }
+
+    public String getSenderAddress() {
+        return senderAddress;
+    }
+
+    public void setSenderAddress(String senderAddress) {
+        this.senderAddress = senderAddress;
+    }
+
     public void doMappingEntity(OrderRequest request, CMLocation receiverLocation, CMLocation senderLocation) {
 //        this.rulID = request.getRulID();
 //        this.cusID = request.getCusID();
@@ -227,5 +249,8 @@ public class Order {
         if (senderLocation != null) {
             this.senderLocation = senderLocation.getId();
         }
+
+        this.recieveAddress = request.getRecieveAddress();
+        this.senderAddress = request.getSenderAddress();
     }
 }
