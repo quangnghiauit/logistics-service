@@ -416,12 +416,16 @@ public class TransManagementServiceImpl implements TransManagementService {
                 orderDetail.setStatus(status);
                 orderDetailRepository.save(orderDetail);
 
-                Order order = orderRepository.getAllById(orderDetail.getOrderID());
-                order.setStatus(status);
-                if (status == 4) {
-                    order.setRecieveDate(DateTimeUtils.getCurrentDateTime());
+                List<OrderDetail> orderDetailList = orderDetailRepository.getAllByOrderID(orderId);
+                if (!isCheckProcessingStatusOrder(orderDetailList)) {
+                    Order order = orderRepository.getAllById(orderDetail.getOrderID());
+                    order.setStatus(status);
+
+                    if (status == 4) {
+                        order.setRecieveDate(DateTimeUtils.getCurrentDateTime());
+                    }
+                    orderRepository.save(order);
                 }
-                orderRepository.save(order);
                 response.success(SUCCESSFUL.getMessage());
             }
         } catch (Exception ex) {
@@ -431,6 +435,16 @@ public class TransManagementServiceImpl implements TransManagementService {
         return response;
     }
 
+    private boolean isCheckProcessingStatusOrder(List<OrderDetail> orderDetailList) {
+        if (orderDetailList.size() > 0) {
+            for (OrderDetail orderDetail : orderDetailList) {
+                if (orderDetail.getStatus() != 4) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
     private List<Vert> initializeMapDijkstra(int start, int end) {
         Map<Integer, Vert> verts = new HashMap<>();
         List<RoutingMapDTO> routingMapDTOS = new ArrayList<>();
