@@ -221,6 +221,8 @@ public class TransManagementServiceImpl implements TransManagementService {
             OrderDetailResponse detailResponse = new OrderDetailResponse();
             OrderDTO orderDTO = new OrderDTO();
             orderDTO.doMappingEntity(order);
+            OrderFeature orderFeature = orderFeatureRepository.getOrderFeatureById(Integer.parseInt(order.getTypeProduct()));
+            orderDTO.setTypeProduct(orderFeature.getDescription());
             detailResponse.setOrder(orderDTO);
 
             List<OrderDetail> orderDetails = orderDetailRepository.getAllByOrderID(order.getId());
@@ -244,7 +246,16 @@ public class TransManagementServiceImpl implements TransManagementService {
                 List<SurchargeDTO> surchargeDTOS = new ArrayList<>();
                 for (RulsurCharge rulsurCharge : rulsurCharges) {
                     SurchargeDTO surchargeDTO = new SurchargeDTO();
-                    surchargeDTO.setAmount(rulsurCharge.getAmount());
+                    long amountFinished = (long) rulsurCharge.getAmount();
+                    if (rulsurCharge.getSurID() == 3) {
+                        WeightRank weightRank = weightRankRepository.getWeightRankByWeight(order.getVolumeProduction());
+                        amountFinished = (long) (amountFinished * weightRank.getRatio());
+                    }
+                    OrderFeature orderFeatureFinish = orderFeatureRepository.getOrderFeatureById(Integer.parseInt(order.getTypeProduct()));
+                    if (orderFeatureFinish != null) {
+                        amountFinished = (long) (amountFinished * orderFeatureFinish.getRatio());
+                    }
+                    surchargeDTO.setAmount(amountFinished);
                     surchargeDTO.setId(rulsurCharge.getSurID());
 
                     CMSurcharge surcharge = surchargeRepository.getCMSurchargeById(rulsurCharge.getSurID());
@@ -284,6 +295,8 @@ public class TransManagementServiceImpl implements TransManagementService {
                 OrderDetailResponse detailResponse = new OrderDetailResponse();
                 OrderDTO orderDTO = new OrderDTO();
                 orderDTO.doMappingEntity(order);
+                OrderFeature orderFeature = orderFeatureRepository.getOrderFeatureById(Integer.parseInt(order.getTypeProduct()));
+                orderDTO.setTypeProduct(orderFeature.getDescription());
                 detailResponse.setOrder(orderDTO);
 
                 List<OrderDetail> orderDetails = orderDetailRepository.getAllByOrderID(order.getId());
@@ -308,7 +321,16 @@ public class TransManagementServiceImpl implements TransManagementService {
                     List<SurchargeDTO> surchargeDTOS = new ArrayList<>();
                     for (RulsurCharge rulsurCharge : rulsurCharges) {
                         SurchargeDTO surchargeDTO = new SurchargeDTO();
-                        surchargeDTO.setAmount(rulsurCharge.getAmount());
+                        long amountFinished = (long) rulsurCharge.getAmount();
+                        if (rulsurCharge.getSurID() == 3) {
+                            WeightRank weightRank = weightRankRepository.getWeightRankByWeight(order.getVolumeProduction());
+                            amountFinished = (long) (amountFinished * weightRank.getRatio());
+                        }
+                        OrderFeature orderFeatureFinish = orderFeatureRepository.getOrderFeatureById(Integer.parseInt(order.getTypeProduct()));
+                        if (orderFeatureFinish != null) {
+                            amountFinished = (long) (amountFinished * orderFeatureFinish.getRatio());
+                        }
+                        surchargeDTO.setAmount(amountFinished);
                         surchargeDTO.setId(rulsurCharge.getSurID());
 
                         CMSurcharge surcharge = surchargeRepository.getCMSurchargeById(rulsurCharge.getSurID());
@@ -352,6 +374,8 @@ public class TransManagementServiceImpl implements TransManagementService {
                     OrderDetailResponse detailResponse = new OrderDetailResponse();
                     OrderDTO orderDTO = new OrderDTO();
                     orderDTO.doMappingEntity(order);
+                    OrderFeature orderFeature = orderFeatureRepository.getOrderFeatureById(Integer.parseInt(order.getTypeProduct()));
+                    orderDTO.setTypeProduct(orderFeature.getDescription());
                     detailResponse.setOrder(orderDTO);
 
                     List<SuggestionDetailDTO> detailDTOList = new ArrayList<>();
@@ -373,7 +397,16 @@ public class TransManagementServiceImpl implements TransManagementService {
                     List<SurchargeDTO> surchargeDTOS = new ArrayList<>();
                     for (RulsurCharge rulsurCharge : rulsurCharges) {
                         SurchargeDTO surchargeDTO = new SurchargeDTO();
-                        surchargeDTO.setAmount(rulsurCharge.getAmount());
+                        long amountFinished = (long) rulsurCharge.getAmount();
+                        if (rulsurCharge.getSurID() == 3) {
+                            WeightRank weightRank = weightRankRepository.getWeightRankByWeight(order.getVolumeProduction());
+                            amountFinished = (long) (amountFinished * weightRank.getRatio());
+                        }
+                        OrderFeature orderFeatureFinish = orderFeatureRepository.getOrderFeatureById(Integer.parseInt(order.getTypeProduct()));
+                        if (orderFeatureFinish != null) {
+                            amountFinished = (long) (amountFinished * orderFeatureFinish.getRatio());
+                        }
+                        surchargeDTO.setAmount(amountFinished);
                         surchargeDTO.setId(rulsurCharge.getSurID());
 
                         CMSurcharge surcharge = surchargeRepository.getCMSurchargeById(rulsurCharge.getSurID());
