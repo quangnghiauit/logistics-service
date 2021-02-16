@@ -12,7 +12,7 @@ public class SuggestRequest {
     private String locDescriptionReceiver;
     private float volumeProduct;
     private float routTransitTime;
-    private float weight;
+    private int typeProduct;
 
     public String getWardIdSender() {
         return wardIdSender;
@@ -94,11 +94,11 @@ public class SuggestRequest {
         this.routTransitTime = routTransitTime;
     }
 
-    public float getWeight() {
-        return weight;
+    public int getTypeProduct() {
+        return typeProduct;
     }
 
-    public void setWeight(float weight) {
-        this.weight = weight;
+    public void setTypeProduct(int typeProduct) {
+        this.typeProduct = typeProduct;
     }
 }

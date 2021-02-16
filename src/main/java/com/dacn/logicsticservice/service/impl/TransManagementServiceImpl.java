@@ -14,7 +14,6 @@ import com.dacn.logicsticservice.service.TransManagementService;
 import com.dacn.logicsticservice.utils.DateTimeUtils;
 import com.dacn.logicsticservice.utils.GsonUtils;
 import com.google.gson.Gson;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -49,6 +48,7 @@ public class TransManagementServiceImpl implements TransManagementService {
     private final CMStatusRepository statusRepository;
     private final UserAccountRepository userAccountRepository;
     private final WeightRankRepository weightRankRepository;
+    private final OrderFeatureRepository orderFeatureRepository;
 
     @Autowired
     public TransManagementServiceImpl(CompanyRepository companyRepository,
@@ -64,7 +64,8 @@ public class TransManagementServiceImpl implements TransManagementService {
                                       OrderDetailRepository orderDetailRepository,
                                       CMStatusRepository statusRepository,
                                       UserAccountRepository userAccountRepository,
-                                      WeightRankRepository weightRankRepository) {
+                                      WeightRankRepository weightRankRepository,
+                                      OrderFeatureRepository orderFeatureRepository) {
 
         this.companyRepository = companyRepository;
         this.customerRepository = customerRepository;
@@ -80,6 +81,7 @@ public class TransManagementServiceImpl implements TransManagementService {
         this.statusRepository = statusRepository;
         this.userAccountRepository = userAccountRepository;
         this.weightRankRepository = weightRankRepository;
+        this.orderFeatureRepository = orderFeatureRepository;
     }
 
     @Override
@@ -137,6 +139,7 @@ public class TransManagementServiceImpl implements TransManagementService {
             String provinceIdReceiver = suggestRequest.getProvinceIdReceiver();
             String locDescriptionReceiver = suggestRequest.getLocDescriptionReceiver();
             float weight = suggestRequest.getVolumeProduct();
+            int orderFeature = suggestRequest.getTypeProduct();
 
             CMLocation senderLocation = locationRepository.getCMLocationByCondition(wardIdSender, districtIdSender,
                     provinceIdSender, locDescriptionSender);
@@ -146,7 +149,7 @@ public class TransManagementServiceImpl implements TransManagementService {
                     provinceIdReceiver, locDescriptionReceiver);
             LOGGER.info("receiverLocation: {}", GsonUtils.toJsonString(receiverLocation));
 
-            List<SuggestionResponseDTO> responseDTOS = processSuggestions(senderLocation, receiverLocation, weight);
+            List<SuggestionResponseDTO> responseDTOS = processSuggestions(senderLocation, receiverLocation, weight, orderFeature);
 
             response.success(SUCCESSFUL.getMessage(), responseDTOS);
         } catch (Exception ex) {
@@ -465,7 +468,7 @@ public class TransManagementServiceImpl implements TransManagementService {
         return response;
     }
 
-    private List<Vert> initializeMapDijkstra(int start, int end, float weight) {
+    private List<Vert> initializeMapDijkstra(int start, int end, float weight,int orderFeatureId) {
         Map<Integer, Vert> verts = new HashMap<>();
         List<RoutingMapDTO> routingMapDTOS = new ArrayList<>();
 
@@ -493,6 +496,10 @@ public class TransManagementServiceImpl implements TransManagementService {
                     if (rulsurCharge.getSurID() == 3) {
                         WeightRank weightRank = weightRankRepository.getWeightRankByWeight(weight);
                         amountFinished = (long) (amountFinished * weightRank.getRatio());
+                    }
+                    OrderFeature orderFeatureFinish = orderFeatureRepository.getOrderFeatureById(orderFeatureId);
+                    if (orderFeatureFinish != null) {
+                        amountFinished = (long) (amountFinished * orderFeatureFinish.getRatio());
                     }
                     totalAmount.addAndGet(amountFinished);
                 });
@@ -530,11 +537,12 @@ public class TransManagementServiceImpl implements TransManagementService {
         return false;
     }
 
-    private List<SuggestionResponseDTO> processSuggestions(CMLocation senderLocation, CMLocation receiverLocation, float weight) {
+    private List<SuggestionResponseDTO> processSuggestions(CMLocation senderLocation, CMLocation receiverLocation,
+                                                           float weight, int orderFeatureId) {
         List<SuggestionResponseDTO> response = new ArrayList<>();
         List<SuggestionDetailDTO> suggestionDetailDTOS = new ArrayList<>();
         try {
-            List<Vert> input = initializeMapDijkstra(senderLocation.getId(), receiverLocation.getId(), weight);
+            List<Vert> input = initializeMapDijkstra(senderLocation.getId(), receiverLocation.getId(), weight, orderFeatureId);
             LOGGER.info("input", input);
 
 
@@ -566,6 +574,10 @@ public class TransManagementServiceImpl implements TransManagementService {
                         if (rulsurCharge.getSurID() == 3) {
                             WeightRank weightRank = weightRankRepository.getWeightRankByWeight(weight);
                             amountFinished = (long) (amountFinished * weightRank.getRatio());
+                        }
+                        OrderFeature orderFeatureFinish = orderFeatureRepository.getOrderFeatureById(orderFeatureId);
+                        if (orderFeatureFinish != null) {
+                            amountFinished = (long) (amountFinished * orderFeatureFinish.getRatio());
                         }
                         surchargeDTO.setAmount(amountFinished);
                         surchargeDTO.setId(rulsurCharge.getSurID());
