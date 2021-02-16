@@ -10,7 +10,7 @@ public class SuggestRequest {
     private String districtIdReceiver;
     private String provinceIdReceiver;
     private String locDescriptionReceiver;
-    private int volumeProduct;
+    private float volumeProduct;
     private float routTransitTime;
     private float weight;
 
@@ -78,11 +78,11 @@ public class SuggestRequest {
         this.locDescriptionReceiver = locDescriptionReceiver;
     }
 
-    public int getVolumeProduct() {
+    public float getVolumeProduct() {
         return volumeProduct;
     }
 
-    public void setVolumeProduct(int volumeProduct) {
+    public void setVolumeProduct(float volumeProduct) {
         this.volumeProduct = volumeProduct;
     }
 

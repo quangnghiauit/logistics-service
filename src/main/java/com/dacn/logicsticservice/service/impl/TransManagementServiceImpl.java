@@ -136,7 +136,7 @@ public class TransManagementServiceImpl implements TransManagementService {
             String districtIdReceiver = suggestRequest.getDistrictIdReceiver();
             String provinceIdReceiver = suggestRequest.getProvinceIdReceiver();
             String locDescriptionReceiver = suggestRequest.getLocDescriptionReceiver();
-            float weight = suggestRequest.getWeight();
+            float weight = suggestRequest.getVolumeProduct();
 
             CMLocation senderLocation = locationRepository.getCMLocationByCondition(wardIdSender, districtIdSender,
                     provinceIdSender, locDescriptionSender);
