@@ -48,6 +48,7 @@ public class TransManagementServiceImpl implements TransManagementService {
     private final OrderDetailRepository orderDetailRepository;
     private final CMStatusRepository statusRepository;
     private final UserAccountRepository userAccountRepository;
+    private final WeightRankRepository weightRankRepository;
 
     @Autowired
     public TransManagementServiceImpl(CompanyRepository companyRepository,
@@ -62,7 +63,8 @@ public class TransManagementServiceImpl implements TransManagementService {
                                       OrderRepository orderRepository,
                                       OrderDetailRepository orderDetailRepository,
                                       CMStatusRepository statusRepository,
-                                      UserAccountRepository userAccountRepository) {
+                                      UserAccountRepository userAccountRepository,
+                                      WeightRankRepository weightRankRepository) {
 
         this.companyRepository = companyRepository;
         this.customerRepository = customerRepository;
@@ -77,6 +79,7 @@ public class TransManagementServiceImpl implements TransManagementService {
         this.orderDetailRepository = orderDetailRepository;
         this.statusRepository = statusRepository;
         this.userAccountRepository = userAccountRepository;
+        this.weightRankRepository = weightRankRepository;
     }
 
     @Override
@@ -133,6 +136,7 @@ public class TransManagementServiceImpl implements TransManagementService {
             String districtIdReceiver = suggestRequest.getDistrictIdReceiver();
             String provinceIdReceiver = suggestRequest.getProvinceIdReceiver();
             String locDescriptionReceiver = suggestRequest.getLocDescriptionReceiver();
+            float weight = suggestRequest.getWeight();
 
             CMLocation senderLocation = locationRepository.getCMLocationByCondition(wardIdSender, districtIdSender,
                     provinceIdSender, locDescriptionSender);
@@ -142,7 +146,7 @@ public class TransManagementServiceImpl implements TransManagementService {
                     provinceIdReceiver, locDescriptionReceiver);
             LOGGER.info("receiverLocation: {}", GsonUtils.toJsonString(receiverLocation));
 
-            List<SuggestionResponseDTO> responseDTOS = processSuggestions(senderLocation, receiverLocation);
+            List<SuggestionResponseDTO> responseDTOS = processSuggestions(senderLocation, receiverLocation, weight);
 
             response.success(SUCCESSFUL.getMessage(), responseDTOS);
         } catch (Exception ex) {
@@ -431,9 +435,14 @@ public class TransManagementServiceImpl implements TransManagementService {
                 }
 
                 if (status == 5) { // orderDetail: đã giao hàng
-                    Order order = orderRepository.getAllById(orderId);
-                    order.setStatus(5); // status: đã giao hàng
-                    orderRepository.save(order);
+                    List<OrderDetail> orderDetailList = orderDetailRepository.getAllByOrderID(orderId);
+                    if (!orderDetailList.isEmpty()) {
+                        if (orderDetailList.get(orderDetailList.size() - 1).getId() == orderDetail.getId())  {
+                            Order order = orderRepository.getAllById(orderId);
+                            order.setStatus(5); // status: đã giao hàng
+                            orderRepository.save(order);
+                        }
+                    }
                 }
             }
             if (status == 6) { // status hoàn thành
@@ -456,7 +465,7 @@ public class TransManagementServiceImpl implements TransManagementService {
         return response;
     }
 
-    private List<Vert> initializeMapDijkstra(int start, int end) {
+    private List<Vert> initializeMapDijkstra(int start, int end, float weight) {
         Map<Integer, Vert> verts = new HashMap<>();
         List<RoutingMapDTO> routingMapDTOS = new ArrayList<>();
 
@@ -480,7 +489,12 @@ public class TransManagementServiceImpl implements TransManagementService {
             rulRates.stream().forEach(rulRate -> {
                 List<RulsurCharge> rulsurCharges = rulsurChargeRepository.getRulsurChargeByRulRateID(rulRate.getId());
                 rulsurCharges.stream().forEach(rulsurCharge -> {
-                    totalAmount.addAndGet((long) rulsurCharge.getAmount());
+                    long amountFinished = (long) rulsurCharge.getAmount();
+                    if (rulsurCharge.getSurID() == 3) {
+                        WeightRank weightRank = weightRankRepository.getWeightRankByWeight(weight);
+                        amountFinished = (long) (amountFinished * weightRank.getRatio());
+                    }
+                    totalAmount.addAndGet(amountFinished);
                 });
             });
             routingMapDTO.setTotalAmount(totalAmount.get());
@@ -516,11 +530,11 @@ public class TransManagementServiceImpl implements TransManagementService {
         return false;
     }
 
-    private List<SuggestionResponseDTO> processSuggestions(CMLocation senderLocation, CMLocation receiverLocation) {
+    private List<SuggestionResponseDTO> processSuggestions(CMLocation senderLocation, CMLocation receiverLocation, float weight) {
         List<SuggestionResponseDTO> response = new ArrayList<>();
         List<SuggestionDetailDTO> suggestionDetailDTOS = new ArrayList<>();
         try {
-            List<Vert> input = initializeMapDijkstra(senderLocation.getId(), receiverLocation.getId());
+            List<Vert> input = initializeMapDijkstra(senderLocation.getId(), receiverLocation.getId(), weight);
             LOGGER.info("input", input);
 
 
@@ -548,7 +562,12 @@ public class TransManagementServiceImpl implements TransManagementService {
                     List<SurchargeDTO> surchargeDTOS = new ArrayList<>();
                     for (RulsurCharge rulsurCharge : rulsurCharges) {
                         SurchargeDTO surchargeDTO = new SurchargeDTO();
-                        surchargeDTO.setAmount(rulsurCharge.getAmount());
+                        long amountFinished = (long) rulsurCharge.getAmount();
+                        if (rulsurCharge.getSurID() == 3) {
+                            WeightRank weightRank = weightRankRepository.getWeightRankByWeight(weight);
+                            amountFinished = (long) (amountFinished * weightRank.getRatio());
+                        }
+                        surchargeDTO.setAmount(amountFinished);
                         surchargeDTO.setId(rulsurCharge.getSurID());
 
                         CMSurcharge surcharge = surchargeRepository.getCMSurchargeById(rulsurCharge.getSurID());

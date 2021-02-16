@@ -12,6 +12,7 @@ public class SuggestRequest {
     private String locDescriptionReceiver;
     private int volumeProduct;
     private float routTransitTime;
+    private float weight;
 
     public String getWardIdSender() {
         return wardIdSender;
@@ -91,5 +92,13 @@ public class SuggestRequest {
 
     public void setRoutTransitTime(float routTransitTime) {
         this.routTransitTime = routTransitTime;
+    }
+
+    public float getWeight() {
+        return weight;
+    }
+
+    public void setWeight(float weight) {
+        this.weight = weight;
     }
 }
