@@ -20,6 +20,9 @@ public class OrderDetail {
     @Column(name ="Status")
     private int status;
 
+    @Column(name = "orderdetailcode")
+    private String orderDetailCode;
+
     public Integer getId() {
         return id;
     }
@@ -50,5 +53,13 @@ public class OrderDetail {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public String getOrderDetailCode() {
+        return orderDetailCode;
+    }
+
+    public void setOrderDetailCode(String orderDetailCode) {
+        this.orderDetailCode = orderDetailCode;
     }
 }

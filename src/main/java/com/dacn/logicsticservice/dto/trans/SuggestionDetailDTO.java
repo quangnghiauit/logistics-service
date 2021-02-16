@@ -9,6 +9,7 @@ import java.util.List;
 
 public class SuggestionDetailDTO {
 
+    private String orderDetailCode;
     private int rulRateId;
     private int status;
     private String companyName;
@@ -125,6 +126,14 @@ public class SuggestionDetailDTO {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public String getOrderDetailCode() {
+        return orderDetailCode;
+    }
+
+    public void setOrderDetailCode(String orderDetailCode) {
+        this.orderDetailCode = orderDetailCode;
     }
 
     public void doMappingEntityToDTO(RulRate rulRate, Company company, float routTransitTime, List<SurchargeDTO> surchargeDTOS) {

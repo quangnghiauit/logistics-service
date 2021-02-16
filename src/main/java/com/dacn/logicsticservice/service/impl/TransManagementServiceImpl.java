@@ -194,6 +194,7 @@ public class TransManagementServiceImpl implements TransManagementService {
                     orderDetail.setOrderID(orderSaved.getId());
                     orderDetail.setRulID(rulrateId);
                     orderDetail.setStatus(1);
+                    orderDetail.setOrderDetailCode("HDCT" + System.currentTimeMillis());
                     orderDetailRepository.save(orderDetail);
                 });
             }
@@ -229,6 +230,7 @@ public class TransManagementServiceImpl implements TransManagementService {
             List<SuggestionDetailDTO> orderdetails = new ArrayList<>();
             orderDetails.forEach(orderDetail -> {
                 SuggestionDetailDTO dto = new SuggestionDetailDTO();
+                dto.setOrderDetailCode(orderDetail.getOrderDetailCode());
                 CMLocation startLocation = locationRepository.getCMLocationById(order.getSenderLocation());
                 dto.setStartLocation(startLocation);
 
@@ -303,6 +305,7 @@ public class TransManagementServiceImpl implements TransManagementService {
                 List<SuggestionDetailDTO> orderdetails = new ArrayList<>();
                 orderDetails.forEach(orderDetail -> {
                     SuggestionDetailDTO dto = new SuggestionDetailDTO();
+                    dto.setOrderDetailCode(orderDetail.getOrderDetailCode());
                     dto.setStatus(orderDetail.getStatus());
                     CMLocation startLocation = locationRepository.getCMLocationById(order.getSenderLocation());
                     dto.setStartLocation(startLocation);
@@ -381,6 +384,7 @@ public class TransManagementServiceImpl implements TransManagementService {
                     List<SuggestionDetailDTO> detailDTOList = new ArrayList<>();
 
                     SuggestionDetailDTO dto = new SuggestionDetailDTO();
+                    dto.setOrderDetailCode(orderDetail.getOrderDetailCode());
                     dto.setStatus(orderDetail.getStatus());
                     CMLocation startLocation = locationRepository.getCMLocationById(order.getSenderLocation());
                     dto.setStartLocation(startLocation);
