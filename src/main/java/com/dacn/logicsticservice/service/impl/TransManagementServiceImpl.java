@@ -416,18 +416,39 @@ public class TransManagementServiceImpl implements TransManagementService {
                 orderDetail.setStatus(status);
                 orderDetailRepository.save(orderDetail);
 
-                List<OrderDetail> orderDetailList = orderDetailRepository.getAllByOrderID(orderId);
-                if (!isCheckProcessingStatusOrder(orderDetailList)) {
-                    Order order = orderRepository.getAllById(orderDetail.getOrderID());
-                    order.setStatus(status);
+                if (status == 3) { // orderDetail: đã gom hàng
+                    Order order = orderRepository.getAllById(orderId);
+                    order.setStatus(4); // status: đang vận chuyển
+                    orderRepository.save(order);
 
-                    if (status == 4) {
-                        order.setRecieveDate(DateTimeUtils.getCurrentDateTime());
-                    }
+                    List<OrderDetail> orderDetailList = orderDetailRepository.getAllByOrderID(orderId);
+                    orderDetailList.forEach(orderDetailMapStatus -> {
+                        if (orderDetailMapStatus.getId() < orderDetail.getId()) {
+                            orderDetailMapStatus.setStatus(6);
+                            orderDetailRepository.save(orderDetailMapStatus);
+                        }
+                    });
+                }
+
+                if (status == 5) { // orderDetail: đã giao hàng
+                    Order order = orderRepository.getAllById(orderId);
+                    order.setStatus(5); // status: đã giao hàng
                     orderRepository.save(order);
                 }
-                response.success(SUCCESSFUL.getMessage());
             }
+            if (status == 6) { // status hoàn thành
+                Order order = orderRepository.getAllById(orderId);
+                order.setStatus(6); // status hoàn thành
+                order.setRecieveDate(DateTimeUtils.getCurrentDateTime());
+                orderRepository.save(order);
+
+                List<OrderDetail> orderDetailList = orderDetailRepository.getAllByOrderID(orderId);
+                orderDetailList.forEach(orderDetailMapStatus -> {
+                    orderDetailMapStatus.setStatus(6);
+                    orderDetailRepository.save(orderDetailMapStatus);
+                });
+            }
+            response.success(SUCCESSFUL.getMessage());
         } catch (Exception ex) {
             LOGGER.info("updateStatusOrder exception: {}", ex);
             response.fail(ex.getMessage());
@@ -435,16 +456,6 @@ public class TransManagementServiceImpl implements TransManagementService {
         return response;
     }
 
-    private boolean isCheckProcessingStatusOrder(List<OrderDetail> orderDetailList) {
-        if (orderDetailList.size() > 0) {
-            for (OrderDetail orderDetail : orderDetailList) {
-                if (orderDetail.getStatus() != 4) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
     private List<Vert> initializeMapDijkstra(int start, int end) {
         Map<Integer, Vert> verts = new HashMap<>();
         List<RoutingMapDTO> routingMapDTOS = new ArrayList<>();

@@ -43,7 +43,7 @@ public class TransManagementController {
 
     @RequestMapping(value = "/update-status-order", method = RequestMethod.GET)
     public ResponseEntity<?> createOrder(@NonNull @RequestParam Integer orderId,
-                                         @NonNull @RequestParam Integer rulrateId,
+                                         @Nullable @RequestParam Integer rulrateId,
                                          @NonNull @RequestParam Integer status) {
         return new ResponseEntity<>(transManagementService.updateStatusOrder(orderId, rulrateId, status), HttpStatus.OK);
     }
