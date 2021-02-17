@@ -1,6 +1,5 @@
 package com.dacn.logicsticservice.dto.request;
 
-import javax.persistence.Column;
 import java.util.List;
 
 public class OrderRequest {
@@ -8,7 +7,7 @@ public class OrderRequest {
     private int rulID;
     private int status;
     private float totalAmount;
-    private float volumeProduction;
+    private float volumeProduct;
     private String createdDate;
     private String receiverName;
     private String receiverPhone;
@@ -61,12 +60,12 @@ public class OrderRequest {
         this.totalAmount = totalAmount;
     }
 
-    public float getVolumeProduction() {
-        return volumeProduction;
+    public float getVolumeProduct() {
+        return volumeProduct;
     }
 
-    public void setVolumeProduction(float volumeProduction) {
-        this.volumeProduction = volumeProduction;
+    public void setVolumeProduct(float volumeProduct) {
+        this.volumeProduct = volumeProduct;
     }
 
     public String getReceiverName() {

@@ -6,7 +6,6 @@ import com.dacn.logicsticservice.utils.DateTimeUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import javax.persistence.*;
-import java.util.Optional;
 
 @Entity
 @Table(name = "orders")
@@ -235,7 +234,7 @@ public class Order {
             this.receiveLocation = receiverLocation.getId();
         }
 
-        this.volumeProduction = request.getVolumeProduction();
+        this.volumeProduction = request.getVolumeProduct();
         this.typeProduct = request.getTypeProduct();
         this.description = request.getDescription();
         this.createdDate = DateTimeUtils.getCurrentDateTime();
