@@ -11,7 +11,7 @@ import java.util.List;
 public interface CMLocationRepository extends JpaRepository<CMLocation, Integer> {
 
     @Query(value = "select * from cmlocation as l where l.WardId = ?1 and l.DistrictId = ?2 " +
-            "and l.ProvinceId = ?3 and l.LocDescription like %?4%", nativeQuery = true)
+            "and l.ProvinceId = ?3 and l.LocDescription like %?4% or l.LocCode like %?4%", nativeQuery = true)
     CMLocation getCMLocationByCondition(String wardId, String districtId, String provinceId, String locDescription);
 
     @Query(value = "select * from cmlocation where ID = ?1", nativeQuery = true)
