@@ -21,6 +21,6 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
     @Query(value = "select * from `orderdetail` where OrderID = ?1", nativeQuery = true)
     List<OrderDetail> getAllByOrderID(Integer orderID);
 
-    @Query(value = "select * from `orderdetail` where RulID = ?1", nativeQuery = true)
+    @Query(value = "select * from `orderdetail` where RulID = ?1 order by OrderID desc", nativeQuery = true)
     List<OrderDetail> getAllByRulId(Integer rulId);
 }
