@@ -231,13 +231,15 @@ public class TransManagementServiceImpl implements TransManagementService {
             orderDetails.forEach(orderDetail -> {
                 SuggestionDetailDTO dto = new SuggestionDetailDTO();
                 dto.setOrderDetailCode(orderDetail.getOrderDetailCode());
-                CMLocation startLocation = locationRepository.getCMLocationById(order.getSenderLocation());
+                RulRate rulRate = rulRateRepository.getRulRateById(orderDetail.getRulID());
+                CMRouting routingMap = routingRepository.getCMRoutingById(rulRate.getRoutID());
+                CMLocation startLocation = locationRepository.getCMLocationById(routingMap.getRoutFirstStep());
                 dto.setStartLocation(startLocation);
 
-                CMLocation endLocation = locationRepository.getCMLocationById(order.getReceiveLocation());
+                CMLocation endLocation = locationRepository.getCMLocationById(routingMap.getRoutLastStep());
                 dto.setEndLocation(endLocation);
 
-                RulRate rulRate = rulRateRepository.getRulRateById(orderDetail.getRulID());
+
 
                 CMContainer container = containerRepository.getCMContainerById(rulRate.getContID());
                 dto.setContainer(container);
@@ -307,13 +309,15 @@ public class TransManagementServiceImpl implements TransManagementService {
                     SuggestionDetailDTO dto = new SuggestionDetailDTO();
                     dto.setOrderDetailCode(orderDetail.getOrderDetailCode());
                     dto.setStatus(orderDetail.getStatus());
-                    CMLocation startLocation = locationRepository.getCMLocationById(order.getSenderLocation());
-                    dto.setStartLocation(startLocation);
-
-                    CMLocation endLocation = locationRepository.getCMLocationById(order.getReceiveLocation());
-                    dto.setEndLocation(endLocation);
 
                     RulRate rulRate = rulRateRepository.getRulRateById(orderDetail.getRulID());
+                    CMRouting routing = routingRepository.getCMRoutingById(rulRate.getRoutID());
+
+                    CMLocation startLocation = locationRepository.getCMLocationById(routing.getRoutFirstStep());
+                    dto.setStartLocation(startLocation);
+
+                    CMLocation endLocation = locationRepository.getCMLocationById(routing.getRoutLastStep());
+                    dto.setEndLocation(endLocation);
 
                     CMContainer container = containerRepository.getCMContainerById(rulRate.getContID());
                     dto.setContainer(container);
@@ -344,8 +348,8 @@ public class TransManagementServiceImpl implements TransManagementService {
                         surchargeDTO.setCurrencyName(currency.getCurName());
                         surchargeDTOS.add(surchargeDTO);
                     }
-                    CMRouting routing = routingRepository.getCMRoutingById(rulRate.getRoutID());
-                    dto.doMappingEntityToDTO(rulRate, company, routing.getRoutTransitTime(), surchargeDTOS);
+                    CMRouting routingFinally = routingRepository.getCMRoutingById(rulRate.getRoutID());
+                    dto.doMappingEntityToDTO(rulRate, company, routingFinally.getRoutTransitTime(), surchargeDTOS);
                     orderdetails.add(dto);
                 });
                 detailResponse.setOrderDetails(orderdetails);
@@ -386,10 +390,13 @@ public class TransManagementServiceImpl implements TransManagementService {
                     SuggestionDetailDTO dto = new SuggestionDetailDTO();
                     dto.setOrderDetailCode(orderDetail.getOrderDetailCode());
                     dto.setStatus(orderDetail.getStatus());
-                    CMLocation startLocation = locationRepository.getCMLocationById(order.getSenderLocation());
+
+                    CMRouting routingMap = routingRepository.getCMRoutingById(rulRate.getRoutID());
+
+                    CMLocation startLocation = locationRepository.getCMLocationById(routingMap.getRoutFirstStep());
                     dto.setStartLocation(startLocation);
 
-                    CMLocation endLocation = locationRepository.getCMLocationById(order.getReceiveLocation());
+                    CMLocation endLocation = locationRepository.getCMLocationById(routingMap.getRoutLastStep());
                     dto.setEndLocation(endLocation);
 
                     CMContainer container = containerRepository.getCMContainerById(rulRate.getContID());
